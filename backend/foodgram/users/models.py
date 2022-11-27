@@ -1,24 +1,12 @@
 from enum import Enum
-import re
 
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
 from django.db import models
 
 from foodgram.settings import (
     CHARFIELD_MAX_LENGTH, EMAIL_MAX_LENGTH, USERNAME_MAX_LENGTH
 )
-
-
-def validate_username(value):
-    if value == 'me':
-        raise ValidationError(
-            ('Запрещено использовать логин me'),
-            params={'value': value},
-        )
-    reg = re.compile(r'^[\w.@+-]+$')
-    if not bool(re.fullmatch(reg, value)):
-        raise ValidationError('Недопустимый символ в username.')
+from validators import validate_username
 
 
 class Roles(Enum):
