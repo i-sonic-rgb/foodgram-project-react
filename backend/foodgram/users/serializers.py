@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
-from validators import validate_username
+from .validators import validate_username
 from models import User
 from foodgram.settings import EMAIL_MAX_LENGTH, USERNAME_MAX_LENGTH
 
