@@ -75,7 +75,7 @@ class Subscription(models.Model):
         related_name='follower',
         verbose_name='Пользователь',
     )
-    author = models.ForeignKey(
+    following = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='following',
@@ -83,3 +83,16 @@ class Subscription(models.Model):
         blank=True,
         null=True,
     )
+
+    class Meta:
+        ordering = ('following',)
+        constraints = [
+            models.UniqueConstraint(
+                name="user_follow_unique_relationships",
+                fields=["user", "following"],
+            ),
+            models.CheckConstraint(
+                name="users_follow_not_self_follow",
+                check=~models.Q(user=models.F("following")),
+            )
+        ]

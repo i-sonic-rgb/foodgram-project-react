@@ -14,10 +14,11 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'django.contrib.admin',
-    'rest_framework',
-    'rest_framework_simplejwt',
     'django_filters',
     'django.contrib.auth',
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'djoser',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -47,6 +48,11 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
     ],
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'AUTH_HEADER_TYPES': ('JWT',)
 }
 
 DATABASES = {
@@ -84,6 +90,12 @@ TEMPLATES = [
     },
 ]
 
+DJOSER = {
+    'SERIALIZERS': {
+        'user_registration': 'users.serializers.UserSerializer',
+    },
+}
+
 WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -116,11 +128,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-    'AUTH_HEADER_TYPES': ('Bearer',),
-}
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
