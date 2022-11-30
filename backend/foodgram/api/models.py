@@ -84,7 +84,7 @@ class Favorite(RecipeListeBaseModel):
         Recipe,
         on_delete=models.CASCADE,
         related_name='favorites',
-        verbose_name='Пользователь',
+        verbose_name='Рецепт',
     )
 
 
@@ -93,6 +93,6 @@ class ShoppingCart(RecipeListeBaseModel):
         Recipe,
         on_delete=models.CASCADE,
         related_name='in_shopping_cart',
-        verbose_name='Пользователь',
+        verbose_name='Рецепт',
     )
 

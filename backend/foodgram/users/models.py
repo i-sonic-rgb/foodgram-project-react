@@ -11,7 +11,6 @@ from .validators import validate_username
 
 class Roles(Enum):
     user = 'user'
-    moderator = 'moderator'
     admin = 'admin'
 
     @classmethod
@@ -43,13 +42,13 @@ class User(AbstractUser):
     first_name = models.CharField(
         verbose_name='Имя',
         max_length=CHARFIELD_MAX_LENGTH,
-        blank=True
     )
     last_name = models.CharField(
         verbose_name='Фамилия',
         max_length=CHARFIELD_MAX_LENGTH,
-        blank=True
     )
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -59,10 +58,6 @@ class User(AbstractUser):
     @property
     def is_admin(self):
         return self.role == Roles.admin.value
-
-    @property
-    def is_moderator(self):
-        return self.role == Roles.moderator.value
 
     def __str__(self) -> str:
         return self.username
@@ -85,6 +80,8 @@ class Subscription(models.Model):
     )
 
     class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
         ordering = ('following',)
         constraints = [
             models.UniqueConstraint(

@@ -25,9 +25,7 @@ from foodgram.settings import (
 
 
 class UserSerializer(serializers.ModelSerializer):
-    is_subscribed = serializers.CharField(
-        max_length=USERNAME_MAX_LENGTH, default = 'false'
-    )
+    is_subscribed = serializers.SerializerMethodField()
     
     class Meta:
         model = User
@@ -39,6 +37,14 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name',
             'is_subscribed'
         )
+
+    def get_is_subscribed(self, obj):
+        if 'request' in self.context:
+            return obj in User.objects.filter(
+                following__user=self.context['request'].user
+                )
+        return False
+
 
 class NewUserCreateSerializer(UserCreateSerializer):
     username = serializers.CharField(
@@ -60,12 +66,6 @@ class NewUserCreateSerializer(UserCreateSerializer):
         max_length=CHARFIELD_MAX_LENGTH,
         required=True
     )
-    password = serializers.CharField(
-        max_length=CHARFIELD_MAX_LENGTH,
-        required=True,
-        write_only=True,
-        style={'input_type': 'password'}
-    )
 
     class Meta:
         model = User
@@ -76,11 +76,24 @@ class NewUserCreateSerializer(UserCreateSerializer):
             'last_name',
             'password' 
         )
+        extra_kwargs = {'password': {'write_only': True}}
+    
+    def create(self, validated_data):
+        user = User(
+            email=validated_data['email'],
+            username=validated_data['username'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+        print('===================')
+        print(user.password)
+        return user
 
-# class TokenSerializer(serializers.ModelSerializer):
-#     username = serializers.CharField(required=True)
-#     confirmation_code = serializers.CharField(required=True)
+class TokenSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=True)
 
-#     class Meta:
-#         model = User
-#         fields = ('username', 'confirmation_code')
+    class Meta:
+        model = User
+        fields = ('email', )
