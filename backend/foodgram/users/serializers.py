@@ -1,3 +1,4 @@
+from django.contrib.auth import password_validation
 from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
@@ -7,21 +8,6 @@ from .models import User
 from foodgram.settings import (
     CHARFIELD_MAX_LENGTH, EMAIL_MAX_LENGTH, USERNAME_MAX_LENGTH,
 )
-
-# class SignUpSerializer(serializers.Serializer):
-#     email = serializers.EmailField(
-#         max_length=EMAIL_MAX_LENGTH,
-#         required=True,
-#         validators=[
-#             UniqueValidator(queryset=User.objects.all())])
-#     username = serializers.CharField(
-#         max_length=USERNAME_MAX_LENGTH,
-#         required=True,
-#         validators=[
-#             validate_username, UniqueValidator(queryset=User.objects.all())])
-
-#     class Meta:
-#         fields = ('username', 'email')
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -39,7 +25,11 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        if 'request' in self.context:
+        # Return True if requesting user is subscribed to the author. 
+        if (
+            'request' in self.context # Need to add this for "users/me/" url.
+            and self.context['request'].user.is_authenticated
+        ):
             return obj in User.objects.filter(
                 following__user=self.context['request'].user
                 )
@@ -67,9 +57,11 @@ class NewUserCreateSerializer(UserCreateSerializer):
         required=True
     )
 
+
     class Meta:
         model = User
         fields  = (
+            'id',
             'username',
             'email',
             'first_name',
@@ -77,7 +69,8 @@ class NewUserCreateSerializer(UserCreateSerializer):
             'password' 
         )
         extra_kwargs = {'password': {'write_only': True}}
-    
+        read_only_fields = ('id',)
+
     def create(self, validated_data):
         user = User(
             email=validated_data['email'],
@@ -87,9 +80,8 @@ class NewUserCreateSerializer(UserCreateSerializer):
         )
         user.set_password(validated_data['password'])
         user.save()
-        print('===================')
-        print(user.password)
         return user
+
 
 class TokenSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
@@ -97,3 +89,20 @@ class TokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('email', )
+
+
+class UserResetPasswordSerializer(serializers.ModelSerializer):
+    new_password = serializers.CharField(required=True)
+    current_password = serializers.CharField(required=True)
+
+    class Meta:
+        model = User
+        fields = ('current_password', 'new_password')
+        extra_kwargs = {
+            'current_password': {'write_only': True},
+            'new_password': {'write_only': True},
+        }
+
+    def validate_new_password(self, value):
+        password_validation.validate_password(value)
+        return value

@@ -25,6 +25,7 @@ class Recipe(models.Model):
         related_name='recipes'
     )
     image = models.TextField(blank=True, null=True)
+    name = models.CharField(max_length=250)
     text = models.TextField(blank=True, null=True)
     ingridients = models.ManyToManyField(
         Ingridient,
@@ -32,6 +33,15 @@ class Recipe(models.Model):
     )
     tags = models.ManyToManyField(Tag, through='RecipeTag')
     cooking_time = models.IntegerField()
+    pub_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата публикации'
+    )
+
+    class Meta:
+        ordering = ('-pub_date',)
+        verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
 
 
 class RecipeIngridient(models.Model):
@@ -48,7 +58,7 @@ class RecipeIngridient(models.Model):
         blank=True,
         null=True
     )
-    amount = models.FloatField(blank=True, null=True)
+    amount = models.IntegerField(blank=True, null=True)
 
 
 class RecipeTag(models.Model):
@@ -71,7 +81,7 @@ class RecipeListeBaseModel(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='%(class)s',
+        related_name='%(class)ss',
         verbose_name='Пользователь',
     )
 
