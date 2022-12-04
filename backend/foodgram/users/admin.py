@@ -10,10 +10,11 @@ class UserAdmin(admin.ModelAdmin):
         'email',
         'role',
         'first_name',
-        'last_name'
+        'last_name',
+        'is_blocked'
     )
     search_fields = ('username', 'email', 'first_name', 'last_name')
-    list_filter = ('role', )
+    list_filter = ('role', 'username', 'email')
     list_editable = ('role',)
     empty_value_display = '-пусто-'
 

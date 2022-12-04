@@ -7,7 +7,7 @@ from users.views import (
 )
 from .views import (
     IngridientViewSet, RecipeViewSet, SubscriptionListViewSet, TagViewSet, 
-    user_subscribe, 
+    download_shopping_cart, recipe_favorite, shopping_cart, user_subscribe
 )
 
 app_name = 'api'
@@ -28,5 +28,20 @@ v1_router.register('ingridients', IngridientViewSet, basename='ingridients')
 urlpatterns = [
     path('auth/', include('djoser.urls.authtoken')),
     path('users/<int:user_id>/subscribe/', user_subscribe, name='subscribe'),
+    path(
+        'recipes/<int:recipe_id>/favorite/',
+        recipe_favorite,
+        name='recipe_favorite'
+    ),
+    path(
+        'recipes/<int:recipe_id>/shopping_cart/',
+        shopping_cart,
+        name='shopping_cart'
+    ),
+    path(
+        'recipes/download_shopping_cart/',
+        download_shopping_cart,
+        name='download_shopping_cart'
+    ),
     path('', include(v1_router.urls)),
 ]

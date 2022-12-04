@@ -1,7 +1,19 @@
+import os
+
 from django.db import models
 
-from foodgram.settings import CHARFIELD_MAX_LENGTH
+from foodgram.settings import CHARFIELD_MAX_LENGTH, MEDIA_ROOT
 from users.models import User
+
+
+def get_upload_path(instance, filename):
+    '''Returns an upload path to image based on Recipe instance.'''
+    print(instance)
+    print('===============')
+    return os.path.join(
+        MEDIA_ROOT, "recipes/images/", instance.author.username, 
+        "recipe_%s" % instance.name, filename
+    )
 
 
 class Ingridient(models.Model):
@@ -24,9 +36,13 @@ class Recipe(models.Model):
         on_delete=models.CASCADE,
         related_name='recipes'
     )
-    image = models.TextField(blank=True, null=True)
-    name = models.CharField(max_length=250)
-    text = models.TextField(blank=True, null=True)
+    image = models.ImageField(
+        upload_to=get_upload_path, 
+        null=True,  
+        default=None
+        )
+    name = models.CharField(max_length=CHARFIELD_MAX_LENGTH)
+    text = models.TextField()
     ingridients = models.ManyToManyField(
         Ingridient,
         through='RecipeIngridient'
@@ -105,4 +121,3 @@ class ShoppingCart(RecipeListeBaseModel):
         related_name='in_shopping_cart',
         verbose_name='Рецепт',
     )
-

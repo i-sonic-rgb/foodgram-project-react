@@ -117,17 +117,11 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 6,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
-        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
     ],
 }
-
-# SIMPLE_JWT = {
-#     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-#     'AUTH_HEADER_TYPES': ('Token',)
-# }
 
 DJOSER = {
     'LOGIN_FIELD': 'email',

@@ -11,6 +11,7 @@ from .validators import validate_username
 
 class Roles(Enum):
     user = 'user'
+    blocked = 'blocked'
     admin = 'admin'
 
     @classmethod
@@ -58,6 +59,10 @@ class User(AbstractUser):
     @property
     def is_admin(self):
         return self.role == Roles.admin.value
+
+    @property
+    def is_blocked(self):
+        return self.role == Roles.blocked.value
 
     def __str__(self) -> str:
         return self.username

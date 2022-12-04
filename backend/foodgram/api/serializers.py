@@ -1,3 +1,6 @@
+import base64
+
+from django.core.files.base import ContentFile
 from django.core.validators import MinValueValidator, MinLengthValidator
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
@@ -10,6 +13,16 @@ from users.serializers import UserSerializer
 from foodgram.settings import (
     CHARFIELD_MAX_LENGTH, EMAIL_MAX_LENGTH, USERNAME_MAX_LENGTH,
 )
+
+class Base64ImageField(serializers.ImageField):
+    def to_internal_value(self, data):
+        if isinstance(data, str) and data.startswith('data:image'):
+            format, imgstr = data.split(';base64,')
+            ext = format.split('/')[-1]
+
+            data = ContentFile(base64.b64decode(imgstr), name='image.' + ext)
+
+        return super().to_internal_value(data)
 
 
 class RecipeIngidientSerializer(serializers.Serializer):
@@ -31,7 +44,7 @@ class RecipeIngidientSerializer(serializers.Serializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     author = UserSerializer(many=False, read_only=True)
-    image = serializers.CharField(required=True)
+    image = Base64ImageField(required=False, allow_null=True)
     cooking_time = serializers.IntegerField(required=True)
     is_favorited = serializers.SerializerMethodField(read_only=True)
     is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
@@ -118,7 +131,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         tags = validated_data.pop('tags')
         ingridients = validated_data.pop('recipeingridient_set')
-        instance.image = validated_data['image']
+        instance.image = validated_data.get('image', instance.image)
         instance.text = validated_data['text']
         instance.cooking_time = validated_data['cooking_time']
         instance.save()
