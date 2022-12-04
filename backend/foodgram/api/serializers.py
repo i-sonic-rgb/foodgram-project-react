@@ -153,7 +153,7 @@ class NestedRecipeSerializer(RecipeSerializer):
         )
 
 
-class NestedUserSerializer(UserSerializer):
+class UserSubscribedSerializer(UserSerializer):
     recipes = NestedRecipeSerializer(many=True, read_only=True)
     recipes_count = serializers.SerializerMethodField(read_only=True)
     
@@ -174,11 +174,32 @@ class NestedUserSerializer(UserSerializer):
         return obj.recipes.count()
 
 class SubscriptionSerializer(serializers.ModelSerializer):
-    following = NestedUserSerializer(many=False, read_only=True)
+    email = serializers.ReadOnlyField(source='following.email')
+    id = serializers.ReadOnlyField(source='following.id')
+    first_name =serializers.ReadOnlyField(source='following.first_name')
+    last_name = serializers.ReadOnlyField(source='following.last_name')
+    username = serializers.ReadOnlyField(source='following.username')
+    recipes = serializers.SerializerMethodField(read_only=True)
+    recipes_count = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = Subscription
-        fields = ('following', )
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'recipes',
+            'recipes_count'
+        )
+    def get_recipes(self, obj):
+        queryset = Recipe.objects.filter(author=obj.following)
+        return NestedRecipeSerializer(queryset, many=True).data[:3]
+
+    def get_recipes_count(self, obj):
+        return obj.following.recipes.count()
+
 
 
 class TagSerializer(serializers.ModelSerializer):

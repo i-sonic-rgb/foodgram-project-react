@@ -13,7 +13,7 @@ from .filters import RecipeFilter
 from .models import Ingridient, Recipe, RecipeIngridient, RecipeTag, Tag
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
-    IngridientSerializer, NestedUserSerializer, RecipeSerializer,
+    IngridientSerializer, UserSubscribedSerializer, RecipeSerializer,
     SubscriptionSerializer, TagSerializer
 )
 from users.models import Subscription, User
@@ -42,12 +42,11 @@ class TagViewSet(ListRetrieveViewSet):
     serializer_class = TagSerializer
 
 
-class SubscriptionListViewSet(ListRetrieveViewSet):
+class SubscriptionListViewSet(ListViewSet):
     queryset = Subscription.objects.all()
     permission_classes = (IsAuthenticated,)
     pagination_class = LimitOffsetPagination
     serializer_class = SubscriptionSerializer
-
 
 
 @api_view(['DELETE', 'POST'])
@@ -70,7 +69,7 @@ def user_subscribe(request, user_id):
         ).exists()
     ):
         Subscription.objects.create(user=request.user, following=author)
-    serializer = NestedUserSerializer(instance=author,)
+    serializer = UserSubscribedSerializer(instance=author,)
     serializer.context['request']=request
     return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
 
