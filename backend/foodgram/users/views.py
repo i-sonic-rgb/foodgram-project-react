@@ -17,7 +17,7 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'id'
     search_fields = ('username',)
     pagination_class = LimitOffsetPagination
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (AllowAny,)
 
     def get_serializer_class(self):
         if (

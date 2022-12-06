@@ -8,25 +8,24 @@ from users.models import User
 
 def get_upload_path(instance, filename):
     '''Returns an upload path to image based on Recipe instance.'''
-    print(instance)
-    print('===============')
     return os.path.join(
-        MEDIA_ROOT, "recipes/images/", instance.author.username, 
-        "recipe_%s" % instance.name, filename
+        MEDIA_ROOT, "recipes/images/", f"{instance.name}-{filename}"
     )
 
 
-class Ingridient(models.Model):
+class Ingredient(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=250)
     measurement_unit = models.CharField(max_length=250)
+    class Meta:
+        ordering = ('name',)
 
 
 class Tag(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=CHARFIELD_MAX_LENGTH)
-    color = models.CharField(max_length=CHARFIELD_MAX_LENGTH)
-    slug = models.SlugField(max_length=CHARFIELD_MAX_LENGTH)
+    name = models.CharField(max_length=CHARFIELD_MAX_LENGTH, unique=True)
+    color = models.CharField(max_length=CHARFIELD_MAX_LENGTH, unique=True,)
+    slug = models.SlugField(max_length=CHARFIELD_MAX_LENGTH, unique=True,)
 
 
 class Recipe(models.Model):
@@ -37,15 +36,15 @@ class Recipe(models.Model):
         related_name='recipes'
     )
     image = models.ImageField(
-        upload_to=get_upload_path, 
+        upload_to="recipes/images/", 
         null=True,  
         default=None
         )
     name = models.CharField(max_length=CHARFIELD_MAX_LENGTH)
     text = models.TextField()
-    ingridients = models.ManyToManyField(
-        Ingridient,
-        through='RecipeIngridient'
+    ingredients = models.ManyToManyField(
+        Ingredient,
+        through='RecipeIngredient'
     )
     tags = models.ManyToManyField(Tag, through='RecipeTag')
     cooking_time = models.IntegerField()
@@ -60,15 +59,15 @@ class Recipe(models.Model):
         verbose_name_plural = 'Рецепты'
 
 
-class RecipeIngridient(models.Model):
+class RecipeIngredient(models.Model):
     recipe_id = models.ForeignKey(
         Recipe,
         on_delete=models.SET_NULL,
         blank=True,
         null=True
     )
-    ingridient_id = models.ForeignKey(
-        Ingridient,
+    ingredient_id = models.ForeignKey(
+        Ingredient,
         on_delete=models.SET_NULL,
         related_name='recipes',
         blank=True,
@@ -91,6 +90,14 @@ class RecipeTag(models.Model):
         blank=True,
         null=True
     )
+    class Meta:
+        ordering = ('tag_id',)
+        constraints = [
+            models.UniqueConstraint(
+                name="recipe_tag_unique_relationships",
+                fields=["recipe_id", "tag_id"],
+            ),
+        ]
 
 
 class RecipeListeBaseModel(models.Model):

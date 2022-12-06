@@ -6,7 +6,7 @@ from users.views import (
     UserViewSet, UserResetPasswordViewSet
 )
 from .views import (
-    IngridientViewSet, RecipeViewSet, SubscriptionListViewSet, TagViewSet, 
+    IngredientViewSet, RecipeViewSet, SubscriptionListViewSet, TagViewSet, 
     download_shopping_cart, recipe_favorite, shopping_cart, user_subscribe
 )
 
@@ -22,7 +22,7 @@ v1_router.register(
 v1_router.register('users', UserViewSet, basename='users')
 v1_router.register('recipes', RecipeViewSet, basename='recipes')
 v1_router.register('tags', TagViewSet, basename='tags')
-v1_router.register('ingridients', IngridientViewSet, basename='ingridients')
+v1_router.register('ingredients', IngredientViewSet, basename='ingredients')
 
 
 urlpatterns = [

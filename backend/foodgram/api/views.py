@@ -1,26 +1,28 @@
-import os
 
+import io
+
+
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont 
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import cm
 from django.db.models import Sum
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.http import FileResponse
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import (filters, mixins, permissions, status, viewsets)
-from rest_framework.decorators import action, api_view
+from rest_framework import filters, mixins, status, viewsets
+from rest_framework.decorators import  api_view
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import (
-    AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
-)
 from rest_framework.response import Response
 
-from foodgram.settings import MEDIA_ROOT
 from .filters import RecipeFilter
-from .models import (Favorite, Ingridient, Recipe, RecipeIngridient, RecipeTag,
-                     ShoppingCart, Tag
-                    )
+from .models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
+from .paginations import RecipePagination
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
-    IngridientSerializer, UserSubscribedSerializer, RecipeSerializer,
+    IngredientSerializer, UserSubscribedSerializer, RecipeSerializer,
     SubscriptionSerializer, TagSerializer, NestedRecipeSerializer
 )
 from users.models import Subscription, User
@@ -45,15 +47,14 @@ class TagViewSet(ListRetrieveViewSet):
     queryset = Tag.objects.all()
     permission_classes = (AllowAny, )
     lookup_field = 'id'
-    pagination_class = LimitOffsetPagination
     serializer_class = TagSerializer
 
 
 class SubscriptionListViewSet(ListViewSet):
     queryset = Subscription.objects.all()
     permission_classes = (IsAuthenticated,)
-    pagination_class = LimitOffsetPagination
     serializer_class = SubscriptionSerializer
+    pagination_class = RecipePagination
 
 
 @api_view(['DELETE', 'POST'])
@@ -130,48 +131,45 @@ def shopping_cart(request, recipe_id):
 @login_required
 def download_shopping_cart(request):
     '''Получаем данные из рецептов в корзине. 
-    
+
     Через related_name обращаемся к модели ShoppingCart, в ней - находим
-    ingridient_id и amount. С помощью annotate создаем новое значение count, 
+    ingredient_id и amount. С помощью annotate создаем новое значение count, 
     в котором суммируем значения всех amount для одинаковых ингридиентов.'''
 
     shopping_cart = request.user.shoppingcarts.all().values(
-            'recipe__recipeingridient__ingridient_id__id',
-            'recipe__recipeingridient__ingridient_id__name',
-            'recipe__recipeingridient__ingridient_id__measurement_unit'
+            'recipe__recipeingredient__ingredient_id__id',
+            'recipe__recipeingredient__ingredient_id__name',
+            'recipe__recipeingredient__ingredient_id__measurement_unit'
         ).order_by(
-            'recipe__recipeingridient__ingridient_id__name'
-        ).annotate(count=Sum('recipe__recipeingridient__amount'))
+            'recipe__recipeingredient__ingredient_id__name'
+        ).annotate(count=Sum('recipe__recipeingredient__amount'))
     if len(shopping_cart) < 1:
         return Response(
             'Your shopping list is empty!', status=status.HTTP_204_NO_CONTENT
         )
     sentence=''
-    for ingridient in shopping_cart:
+    for ingredient in shopping_cart:
         sentence += '{name} ({measurement_unit}) - {amount}\n'.format(
-            name=ingridient['recipe__recipeingridient__ingridient_id__name'],
-            measurement_unit=ingridient[
-                'recipe__recipeingridient__ingridient_id__measurement_unit'
+            name=ingredient['recipe__recipeingredient__ingredient_id__name'],
+            measurement_unit=ingredient[
+                'recipe__recipeingredient__ingredient_id__measurement_unit'
             ],
-            amount=ingridient['count']
+            amount=ingredient['count']
         )
     sentence += 'Thanks! Your shopping list is created by IP.'
     
-    # Поскольку изначально директоря для media отсутствует, создаем ее.
-    os.makedirs(os.path.dirname(f'{MEDIA_ROOT}/'), exist_ok=True)
-    
-    with open(
-        f"{MEDIA_ROOT}/{request.user.username}-shoppinglsit.txt",
-        "w", encoding="utf-8"
-    ) as file:
-        file.write(sentence)
-    FileData = open(
-        f"{MEDIA_ROOT}/{request.user.username}-shoppinglsit.txt",
-        "r", encoding="utf-8"
-    )
-    response = HttpResponse(FileData, content_type='application/txt')
-    response['Content-Disposition'] = 'attachment; filename=NameOfFile'
-    os.remove(f"{MEDIA_ROOT}/{request.user.username}-shoppinglsit.txt")
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer)
+    pdfmetrics.registerFont(TTFont('FreeSans', './FreeSans.ttf'))
+    c.setFont('FreeSans', 12)
+    textobject = c.beginText(2*cm, 29.7 * cm - 2 * cm)
+    for line in sentence.splitlines(False):
+        textobject.textLine(line.encode('utf-8'))
+    c.drawText(textobject)
+    c.save()
+    buffer.seek(0)
+
+    response = FileResponse(buffer, as_attachment=True, filename='List.pdf')
     return response
 
 
@@ -181,20 +179,21 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
     lookup_field = 'id'
     filter_backends = (DjangoFilterBackend, filters.SearchFilter, )
+    pagination_class = RecipePagination
     filterset_class = RecipeFilter
     search_fields = ('$text',)
-    pagination_class = LimitOffsetPagination
     http_method_names = ['get', 'post', 'patch', 'delete']
 
 
-class IngridientViewSet(ListRetrieveViewSet):
-    queryset = Ingridient.objects.all()
+class IngredientViewSet(ListRetrieveViewSet):
+    queryset = Ingredient.objects.all()
     permission_classes = (AllowAny, )
     lookup_field = 'id'
+    serializer_class = IngredientSerializer
+    filter_backends = (DjangoFilterBackend,  filters.SearchFilter,)
     pagination_class = LimitOffsetPagination
-    serializer_class = IngridientSerializer
-    filter_backends = (filters.SearchFilter, )
     search_fields = ('$name',)
+
 
 
 # @action(['post'], detail=False, name='Add recipe to favorite',
