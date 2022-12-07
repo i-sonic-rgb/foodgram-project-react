@@ -1,7 +1,6 @@
 import os
 
 from django.db import models
-
 from foodgram.settings import CHARFIELD_MAX_LENGTH, MEDIA_ROOT
 from users.models import User
 
