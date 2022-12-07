@@ -1,7 +1,8 @@
-from django_filters import rest_framework as filters
 import django_filters
+from django_filters import rest_framework as filters
 
 from .models import Ingredient, Recipe
+
 
 class RecipeFilter(django_filters.FilterSet):
     is_favorited = filters.BooleanFilter(method='get_is_favorited')

@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-*w9zie)xft^p(&1xl968#%sl5eugzp8m)$4fshzi0*%h!+!q0v'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -103,6 +103,9 @@ USE_L10N = True
 
 USE_TZ = True
 
+STATICFILES_DIRS = [
+    '/usr/local/lib/python3.7/site-packages/django/contrib/admin/static',
+]
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 

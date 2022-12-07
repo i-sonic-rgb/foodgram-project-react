@@ -5,10 +5,10 @@ from django.core.files.base import ContentFile
 from django.core.validators import MinValueValidator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-
-from .models import Ingredient, Recipe, RecipeIngredient, RecipeTag, Tag, User
 from users.models import Subscription
 from users.serializers import UserSerializer
+
+from .models import Ingredient, Recipe, RecipeIngredient, RecipeTag, Tag, User
 
 
 class Hex2NameColor(serializers.Field):
@@ -138,7 +138,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        tags = set(validated_data.pop('tags'))
+        tags = set(validated_data.pop('tags')) # only unique tags available
         ingredients = validated_data.pop('recipeingredient_set')
         instance = Recipe.objects.create(
             author=self.context['request'].user, **validated_data
@@ -148,11 +148,22 @@ class RecipeSerializer(serializers.ModelSerializer):
             tag_instance=RecipeTag(tag_id=tag, recipe_id=instance)
             tag_instance.save()
 
+        # If user add several identical ingridients, their amount sums.
+        dataset = {}
         for ingredient in ingredients:
+            if ingredient['ingredient_id']['id'] in dataset.keys():
+                dataset[
+                    ingredient['ingredient_id']['id']
+                ] += ingredient['amount']
+            else:
+                dataset[
+                    ingredient['ingredient_id']['id']
+                ] = ingredient['amount']
+        for id, amount in dataset.items():
             ri = RecipeIngredient(
-                ingredient_id=ingredient['ingredient_id']['id'],
+                ingredient_id=id,
                 recipe_id=instance,
-                amount=ingredient['amount']
+                amount=amount
             )
             ri.save()
         instance.save()
@@ -173,11 +184,23 @@ class RecipeSerializer(serializers.ModelSerializer):
             RecipeTag.objects.get_or_create(tag_id=tag, recipe_id=instance)
 
         RecipeIngredient.objects.filter(recipe_id=instance).delete()
+        
+        # If user add several identical ingridients, their amount sums.
+        dataset = {}
         for ingredient in ingredients:
+            if ingredient['ingredient_id']['id'] in dataset.keys():
+                dataset[
+                    ingredient['ingredient_id']['id']
+                ] += ingredient['amount']
+            else:
+                dataset[
+                    ingredient['ingredient_id']['id']
+                ] = ingredient['amount']
+        for id, amount in dataset.items():
             RecipeIngredient.objects.create(
                 recipe_id=instance,
-                ingredient_id=ingredient['ingredient_id']['id'],
-                amount=ingredient['amount']
+                ingredient_id=id,
+                amount=amount
             )
 
         return instance

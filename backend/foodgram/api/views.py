@@ -1,31 +1,29 @@
 
 import io
 
-
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont 
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import cm
-from django.db.models import Sum
 from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from reportlab.lib.units import cm
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfgen import canvas
 from rest_framework import filters, mixins, status, viewsets
-from rest_framework.decorators import  api_view
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.decorators import api_view
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from users.models import Subscription, User
 
 from .filters import RecipeFilter
 from .models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
 from .paginations import RecipePagination
 from .permissions import IsAuthorOrReadOnly
-from .serializers import (
-    IngredientSerializer, UserSubscribedSerializer, RecipeSerializer,
-    SubscriptionSerializer, TagSerializer, NestedRecipeSerializer
-)
-from users.models import Subscription, User
+from .serializers import (IngredientSerializer, NestedRecipeSerializer,
+                          RecipeSerializer, SubscriptionSerializer,
+                          TagSerializer, UserSubscribedSerializer)
 
 
 class ListRetrieveViewSet(

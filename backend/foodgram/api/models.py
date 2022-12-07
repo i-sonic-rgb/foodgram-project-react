@@ -1,7 +1,6 @@
 import os
 
 from django.db import models
-
 from foodgram.settings import CHARFIELD_MAX_LENGTH, MEDIA_ROOT
 from users.models import User
 
@@ -36,7 +35,7 @@ class Recipe(models.Model):
         related_name='recipes'
     )
     image = models.ImageField(
-        upload_to="recipes/images/", 
+        upload_to=get_upload_path, 
         null=True,  
         default=None
         )

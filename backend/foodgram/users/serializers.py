@@ -1,13 +1,12 @@
 from django.contrib.auth import password_validation
 from djoser.serializers import UserCreateSerializer
+from foodgram.settings import (CHARFIELD_MAX_LENGTH, EMAIL_MAX_LENGTH,
+                               USERNAME_MAX_LENGTH)
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
-from .validators import validate_username
 from .models import User
-from foodgram.settings import (
-    CHARFIELD_MAX_LENGTH, EMAIL_MAX_LENGTH, USERNAME_MAX_LENGTH,
-)
+from .validators import validate_username
 
 
 class UserSerializer(serializers.ModelSerializer):

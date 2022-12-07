@@ -6,9 +6,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
 from .models import User
-from .serializers import (
-    NewUserCreateSerializer, UserSerializer, UserResetPasswordSerializer
-)
+from .serializers import (NewUserCreateSerializer, UserResetPasswordSerializer,
+                          UserSerializer)
 
 
 class UserViewSet(viewsets.ModelViewSet):
