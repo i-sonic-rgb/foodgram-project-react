@@ -135,5 +135,7 @@ media/
 
 frontend/
 
+**/.vscode/
 .vscode/
 *.code-workspace
+*.settings.json
