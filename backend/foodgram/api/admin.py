@@ -31,7 +31,7 @@ class RecipeAdmin(admin.ModelAdmin):
     def get_tags(self, obj):
         return [tag.name for tag in obj.tags.all()]
 
-    def favorited(sellf, obj):
+    def favorited(self, obj):
         return len(obj.favorites.all())
 
 

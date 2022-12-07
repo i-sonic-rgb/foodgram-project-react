@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import filters, mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from .models import User
@@ -57,9 +57,9 @@ class UserResetPasswordViewSet(
     mixins.CreateModelMixin,
     viewsets.GenericViewSet,
 ):
-    permission_classes=(permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated,)
     serializer_class = UserResetPasswordSerializer
-    
+
     def perform_create(self, serializer):
         user = self.request.user
         if serializer.is_valid():
@@ -71,4 +71,3 @@ class UserResetPasswordViewSet(
             return Response({'Current_password': ['Wrong password.']},
                             status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-

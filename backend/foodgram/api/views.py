@@ -167,8 +167,7 @@ def download_shopping_cart(request):
     c.save()
     buffer.seek(0)
 
-    response = FileResponse(buffer, as_attachment=True, filename='List.pdf')
-    return response
+    return FileResponse(buffer, as_attachment=True, filename='List.pdf')
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
