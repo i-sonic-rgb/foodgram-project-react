@@ -15,8 +15,7 @@ services:
       - ./.env
 
   web:
-    build:
-      context: ../backend/foodgram
+    image: isonicrgb/foodgram:latest
     restart: always
     ports:
       - "8000:8000"
