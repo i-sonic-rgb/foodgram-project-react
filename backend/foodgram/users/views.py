@@ -11,6 +11,7 @@ from .serializers import (NewUserCreateSerializer, UserResetPasswordSerializer,
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    '''CustomUser ViewSet Class. Separate serializers for creating new User.'''
     queryset = User.objects.all()
     filter_backends = (filters.SearchFilter,)
     lookup_field = 'id'
@@ -29,6 +30,9 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_user(self, user_id):
         return User.objects.filter(id=user_id)
 
+    # Special action for ...api/users/me/ URL. Returns User object of
+    # the authenticated User. On frontend data from this action put on
+    # the website's header.
     @action(
         detail=False,
         methods=['GET'],
@@ -57,17 +61,17 @@ class UserResetPasswordViewSet(
     mixins.CreateModelMixin,
     viewsets.GenericViewSet,
 ):
+    '''Custom Viewset for resetting password. Only POST available.'''
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = UserResetPasswordSerializer
 
     def perform_create(self, serializer):
         user = self.request.user
-        if serializer.is_valid():
-            current_password = serializer.data.get('current_password')
-            if user.check_password(current_password):
-                user.set_password(serializer.data.get('new_password'))
-                user.save()
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            return Response({'Current_password': ['Wrong password.']},
-                            status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        current_password = serializer.data.get('current_password')
+        if user.check_password(current_password):
+            user.set_password(serializer.data.get('new_password'))
+            user.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({'Current_password': ['Wrong password.']},
+                        status=status.HTTP_400_BAD_REQUEST)

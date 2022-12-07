@@ -1,4 +1,3 @@
-
 import io
 
 from django.contrib.auth.decorators import login_required
@@ -10,7 +9,7 @@ from reportlab.lib.units import cm
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
-from rest_framework import filters, mixins, status, viewsets
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -18,27 +17,13 @@ from rest_framework.response import Response
 from users.models import Subscription, User
 
 from .filters import RecipeFilter
+from .mixins import ListViewSet, ListRetrieveViewSet
 from .models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
 from .paginations import RecipePagination
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (IngredientSerializer, NestedRecipeSerializer,
                           RecipeSerializer, SubscriptionSerializer,
                           TagSerializer, UserSubscribedSerializer)
-
-
-class ListRetrieveViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet
-):
-    pass
-
-
-class ListViewSet(
-    mixins.ListModelMixin,
-    viewsets.GenericViewSet
-):
-    pass
 
 
 class TagViewSet(ListRetrieveViewSet):
@@ -80,49 +65,69 @@ def user_subscribe(request, user_id):
     return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['DELETE', 'POST'])
-@login_required
-def recipe_favorite(request, recipe_id):
-    '''Функция для добавления и удаления рецептов в избранное.'''
+def favorite_shoppingcart_func(request, model, recipe_id):
     if request.method == 'DELETE':
         get_object_or_404(
-            Favorite,
+            model,
             user=request.user,
             recipe__id=recipe_id
         ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     recipe = get_object_or_404(Recipe, id=recipe_id)
-    if not Favorite.objects.filter(
+    if not model.objects.filter(
             user=request.user,
             recipe__id=recipe_id
     ).exists():
-        Favorite.objects.create(user=request.user, recipe=recipe)
+        model.objects.create(user=request.user, recipe=recipe)
     serializer = NestedRecipeSerializer(instance=recipe)
     return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['DELETE', 'POST'])
+@login_required
+def recipe_favorite(request, recipe_id):
+    '''View function to add recipe to favorites.'''
+    return favorite_shoppingcart_func(request, Favorite, recipe_id)
+    # if request.method == 'DELETE':
+    #     get_object_or_404(
+    #         Favorite,
+    #         user=request.user,
+    #         recipe__id=recipe_id
+    #     ).delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # recipe = get_object_or_404(Recipe, id=recipe_id)
+    # if not Favorite.objects.filter(
+    #         user=request.user,
+    #         recipe__id=recipe_id
+    # ).exists():
+    #     Favorite.objects.create(user=request.user, recipe=recipe)
+    # serializer = NestedRecipeSerializer(instance=recipe)
+    # return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['DELETE', 'POST'])
 @login_required
 def shopping_cart(request, recipe_id):
     '''Функция для добавления и удаления рецептов в корзину рецептов.'''
+    return favorite_shoppingcart_func(request, ShoppingCart, recipe_id)
+    # if request.method == 'DELETE':
+    #     get_object_or_404(
+    #         ShoppingCart,
+    #         user=request.user,
+    #         recipe__id=recipe_id
+    #     ).delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
 
-    if request.method == 'DELETE':
-        get_object_or_404(
-            ShoppingCart,
-            user=request.user,
-            recipe__id=recipe_id
-        ).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    recipe = get_object_or_404(Recipe, id=recipe_id)
-    if not ShoppingCart.objects.filter(
-            user=request.user,
-            recipe__id=recipe_id
-    ).exists():
-        ShoppingCart.objects.create(user=request.user, recipe=recipe)
-    serializer = NestedRecipeSerializer(instance=recipe)
-    return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+    # recipe = get_object_or_404(Recipe, id=recipe_id)
+    # if not ShoppingCart.objects.filter(
+    #         user=request.user,
+    #         recipe__id=recipe_id
+    # ).exists():
+    #     ShoppingCart.objects.create(user=request.user, recipe=recipe)
+    # serializer = NestedRecipeSerializer(instance=recipe)
+    # return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['GET'])

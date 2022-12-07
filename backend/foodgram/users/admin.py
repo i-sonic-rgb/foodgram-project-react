@@ -4,6 +4,7 @@ from .models import Subscription, User
 
 
 class UserAdmin(admin.ModelAdmin):
+    '''User AdminModel for standart DjangoAdmin panel.'''
     list_display = (
         'id',
         'username',
@@ -20,6 +21,7 @@ class UserAdmin(admin.ModelAdmin):
 
 
 class SubscriptionAdmin(admin.ModelAdmin):
+    '''Subscription AdminModel for standart DjangoAdmin panel.'''
     list_display = (
         'id',
         'user',

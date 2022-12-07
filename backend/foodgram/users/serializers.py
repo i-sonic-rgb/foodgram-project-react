@@ -10,6 +10,7 @@ from .validators import validate_username
 
 
 class UserSerializer(serializers.ModelSerializer):
+    '''CustomUser serializer.'''
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
@@ -36,6 +37,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class NewUserCreateSerializer(UserCreateSerializer):
+    '''Serializer for creation of new CustomUser.'''
     username = serializers.CharField(
         max_length=USERNAME_MAX_LENGTH,
         required=True,
@@ -66,6 +68,7 @@ class NewUserCreateSerializer(UserCreateSerializer):
             'last_name',
             'password'
         )
+        # Add write_only to hash password letters.
         extra_kwargs = {'password': {'write_only': True}}
         read_only_fields = ('id',)
 
@@ -81,15 +84,8 @@ class NewUserCreateSerializer(UserCreateSerializer):
         return user
 
 
-class TokenSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(required=True)
-
-    class Meta:
-        model = User
-        fields = ('email', )
-
-
 class UserResetPasswordSerializer(serializers.ModelSerializer):
+    '''Serializer for resetting password.'''
     new_password = serializers.CharField(required=True)
     current_password = serializers.CharField(required=True)
 

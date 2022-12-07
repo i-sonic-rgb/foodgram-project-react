@@ -9,6 +9,7 @@ from .validators import validate_username
 
 
 class Roles(Enum):
+    '''Class for chosing User roles. Default role is "user".'''
     user = 'user'
     blocked = 'blocked'
     admin = 'admin'
@@ -19,6 +20,7 @@ class Roles(Enum):
 
 
 class User(AbstractUser):
+    '''Custom User class. Added role(see Roles), first_name and last_name.'''
     username = models.CharField(
         verbose_name='Имя пользователя',
         validators=(validate_username,),
@@ -47,6 +49,7 @@ class User(AbstractUser):
         verbose_name='Фамилия',
         max_length=CHARFIELD_MAX_LENGTH,
     )
+    # To authenticate with email instead of username reassign USERNAME_FIELD.
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
@@ -68,6 +71,7 @@ class User(AbstractUser):
 
 
 class Subscription(models.Model):
+    '''Subscription model (user-to-author) class.'''
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -84,6 +88,7 @@ class Subscription(models.Model):
     )
 
     class Meta:
+        '''Only unique subscriptions, no subscription to self.'''
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
         ordering = ('following',)
@@ -97,3 +102,6 @@ class Subscription(models.Model):
                 check=~models.Q(user=models.F("following")),
             )
         ]
+
+    def __str__(self) -> str:
+        return f'{self.user.username}-{self.following.username}'
