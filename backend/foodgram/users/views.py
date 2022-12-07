@@ -61,7 +61,7 @@ class UserResetPasswordViewSet(
     mixins.CreateModelMixin,
     viewsets.GenericViewSet,
 ):
-    '''Custom Viewset for resetting password. Only POST available.'''
+    '''Custom ViewSet for resetting password. Only POST available.'''
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = UserResetPasswordSerializer
 
