@@ -31,7 +31,7 @@ class UserSerializer(serializers.ModelSerializer):
         ):
             return obj in User.objects.filter(
                 following__user=self.context['request'].user
-                )
+            )
         return False
 
 

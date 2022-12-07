@@ -135,12 +135,12 @@ def download_shopping_cart(request):
     в котором суммируем значения всех amount для одинаковых ингридиентов.'''
 
     shopping_cart = request.user.shoppingcarts.all().values(
-            'recipe__recipeingredient__ingredient_id__id',
-            'recipe__recipeingredient__ingredient_id__name',
-            'recipe__recipeingredient__ingredient_id__measurement_unit'
-        ).order_by(
-            'recipe__recipeingredient__ingredient_id__name'
-        ).annotate(count=Sum('recipe__recipeingredient__amount'))
+        'recipe__recipeingredient__ingredient_id__id',
+        'recipe__recipeingredient__ingredient_id__name',
+        'recipe__recipeingredient__ingredient_id__measurement_unit'
+    ).order_by(
+        'recipe__recipeingredient__ingredient_id__name'
+    ).annotate(count=Sum('recipe__recipeingredient__amount'))
     if len(shopping_cart) < 1:
         return Response(
             'Your shopping list is empty!', status=status.HTTP_204_NO_CONTENT
@@ -160,7 +160,7 @@ def download_shopping_cart(request):
     c = canvas.Canvas(buffer)
     pdfmetrics.registerFont(TTFont('FreeSans', './FreeSans.ttf'))
     c.setFont('FreeSans', 12)
-    textobject = c.beginText(2*cm, 29.7 * cm - 2 * cm)
+    textobject = c.beginText(2 * cm, 29.7 * cm - 2 * cm)
     for line in sentence.splitlines(False):
         textobject.textLine(line.encode('utf-8'))
     c.drawText(textobject)
@@ -187,6 +187,6 @@ class IngredientViewSet(ListRetrieveViewSet):
     permission_classes = (AllowAny, )
     lookup_field = 'id'
     serializer_class = IngredientSerializer
-    filter_backends = (DjangoFilterBackend,  filters.SearchFilter,)
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter, )
     pagination_class = LimitOffsetPagination
     search_fields = ('$name',)

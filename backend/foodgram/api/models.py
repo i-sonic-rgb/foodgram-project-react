@@ -39,7 +39,7 @@ class Recipe(models.Model):
         upload_to=get_upload_path,
         null=True,
         default=None
-        )
+    )
     name = models.CharField(max_length=CHARFIELD_MAX_LENGTH)
     text = models.TextField()
     ingredients = models.ManyToManyField(
