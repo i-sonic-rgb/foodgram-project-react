@@ -11,7 +11,7 @@ from .validators import validate_username
 
 class UserSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = User
         fields = (
@@ -24,9 +24,9 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        # Return True if requesting user is subscribed to the author. 
+        # Return True if requesting user is subscribed to the author.
         if (
-            'request' in self.context # Need to add this for "users/me/" url.
+            'request' in self.context  # Need to add this for "users/me/" url.
             and self.context['request'].user.is_authenticated
         ):
             return obj in User.objects.filter(
@@ -56,16 +56,15 @@ class NewUserCreateSerializer(UserCreateSerializer):
         required=True
     )
 
-
     class Meta:
         model = User
-        fields  = (
+        fields = (
             'id',
             'username',
             'email',
             'first_name',
             'last_name',
-            'password' 
+            'password'
         )
         extra_kwargs = {'password': {'write_only': True}}
         read_only_fields = ('id',)

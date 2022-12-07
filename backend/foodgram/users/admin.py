@@ -18,6 +18,7 @@ class UserAdmin(admin.ModelAdmin):
     list_editable = ('role',)
     empty_value_display = '-пусто-'
 
+
 class SubscriptionAdmin(admin.ModelAdmin):
     list_display = (
         'id',

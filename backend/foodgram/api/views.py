@@ -65,7 +65,7 @@ def user_subscribe(request, user_id):
             following__id=user_id
         ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
+
     author = get_object_or_404(User, id=user_id)
     if (
         request.user != author
@@ -76,7 +76,7 @@ def user_subscribe(request, user_id):
     ):
         Subscription.objects.create(user=request.user, following=author)
     serializer = UserSubscribedSerializer(instance=author,)
-    serializer.context['request']=request
+    serializer.context['request'] = request
     return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
 
 
@@ -96,7 +96,7 @@ def recipe_favorite(request, recipe_id):
     if not Favorite.objects.filter(
             user=request.user,
             recipe__id=recipe_id
-        ).exists():
+    ).exists():
         Favorite.objects.create(user=request.user, recipe=recipe)
     serializer = NestedRecipeSerializer(instance=recipe)
     return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
@@ -119,7 +119,7 @@ def shopping_cart(request, recipe_id):
     if not ShoppingCart.objects.filter(
             user=request.user,
             recipe__id=recipe_id
-        ).exists():
+    ).exists():
         ShoppingCart.objects.create(user=request.user, recipe=recipe)
     serializer = NestedRecipeSerializer(instance=recipe)
     return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
@@ -128,10 +128,10 @@ def shopping_cart(request, recipe_id):
 @api_view(['GET'])
 @login_required
 def download_shopping_cart(request):
-    '''Получаем данные из рецептов в корзине. 
+    '''Получаем данные из рецептов в корзине.
 
     Через related_name обращаемся к модели ShoppingCart, в ней - находим
-    ingredient_id и amount. С помощью annotate создаем новое значение count, 
+    ingredient_id и amount. С помощью annotate создаем новое значение count,
     в котором суммируем значения всех amount для одинаковых ингридиентов.'''
 
     shopping_cart = request.user.shoppingcarts.all().values(
@@ -145,7 +145,7 @@ def download_shopping_cart(request):
         return Response(
             'Your shopping list is empty!', status=status.HTTP_204_NO_CONTENT
         )
-    sentence=''
+    sentence = ''
     for ingredient in shopping_cart:
         sentence += '{name} ({measurement_unit}) - {amount}\n'.format(
             name=ingredient['recipe__recipeingredient__ingredient_id__name'],
@@ -155,7 +155,7 @@ def download_shopping_cart(request):
             amount=ingredient['count']
         )
     sentence += 'Thanks! Your shopping list is created by IP.'
-    
+
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer)
     pdfmetrics.registerFont(TTFont('FreeSans', './FreeSans.ttf'))
@@ -191,11 +191,3 @@ class IngredientViewSet(ListRetrieveViewSet):
     filter_backends = (DjangoFilterBackend,  filters.SearchFilter,)
     pagination_class = LimitOffsetPagination
     search_fields = ('$name',)
-
-
-
-# @action(['post'], detail=False, name='Add recipe to favorite',
-#             url_path=r'(?P<recipe_id>\d+)/favorite')
-#     def favorite(self, request, *args, **kwargs):
-#         return ...
-# Если добавить detail=True, то автоматом будет id перед именем вставлен

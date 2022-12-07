@@ -27,10 +27,10 @@ class RecipeAdmin(admin.ModelAdmin):
     search_fields = ('text', 'author__username', 'name', )
     list_filter = ('author', 'name', 'tags')
     empty_value_display = '-пусто-'
-    
+
     def get_tags(self, obj):
         return [tag.name for tag in obj.tags.all()]
-    
+
     def favorited(sellf, obj):
         return len(obj.favorites.all())
 
@@ -45,7 +45,6 @@ class IngredientAdmin(admin.ModelAdmin):
     list_filter = ('name',)
 
 
-
 class TagAdmin(admin.ModelAdmin):
     '''Admin for tags. slug field created automatically (can be changed).'''
 
@@ -53,7 +52,6 @@ class TagAdmin(admin.ModelAdmin):
     inlines = (RecipeTagInline,)
     search_fields = ('name', )
     prepopulated_fields = {'slug': ('name',)}
-
 
 
 class FaworiteShoppingCartBase(admin.ModelAdmin):
@@ -83,5 +81,4 @@ admin.site.register(ShoppingCart, ShoppingCartAdmin)
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Recipe, RecipeAdmin)
-
 admin.site.register(RecipeIngredient, RecipeIngredientAdmin)

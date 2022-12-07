@@ -3,7 +3,6 @@ import base64
 import webcolors
 from django.core.files.base import ContentFile
 from django.core.validators import MinValueValidator
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from users.models import Subscription
 from users.serializers import UserSerializer
@@ -18,6 +17,7 @@ class Hex2NameColor(serializers.Field):
         except ValueError:
             value = 'black'
         return value
+
     def to_internal_value(self, data):
         try:
             data = webcolors.hex_to_name(data)
@@ -36,6 +36,7 @@ class Base64ImageField(serializers.ImageField):
 
         return super().to_internal_value(data)
 
+
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
@@ -44,6 +45,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 class TagSerializer(serializers.ModelSerializer):
     color = Hex2NameColor()
+
     class Meta:
         model = Tag
         fields = ('id', 'name', 'color', 'slug')
@@ -51,12 +53,12 @@ class TagSerializer(serializers.ModelSerializer):
 
 class TagField(serializers.RelatedField):
     def to_representation(self, obj):
-       return TagSerializer(obj).data
+        return TagSerializer(obj).data
 
     def to_internal_value(self, data):
         try:
             tag = Tag.objects.get(id=data)
-        except:
+        except Exception:
             raise serializers.ValidationError('No such tag!')
         return tag
 
@@ -71,7 +73,7 @@ class RecipeIngidientSerializer(serializers.Serializer):
         source='ingredient_id.measurement_unit'
     )
     amount = serializers.IntegerField(
-        required=True, validators=[MinValueValidator(1),]
+        required=True, validators=[MinValueValidator(1), ]
     )
 
     class Meta:
@@ -88,7 +90,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngidientSerializer(
         required=True, many=True, source='recipeingredient_set'
     )
-    tags =  TagField(queryset=Tag.objects.all(), many=True)
+    tags = TagField(queryset=Tag.objects.all(), many=True)
 
     class Meta:
         model = Recipe
@@ -138,14 +140,15 @@ class RecipeSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        tags = set(validated_data.pop('tags')) # only unique tags available
+        # only unique tags available.
+        tags = set(validated_data.pop('tags'))
         ingredients = validated_data.pop('recipeingredient_set')
         instance = Recipe.objects.create(
             author=self.context['request'].user, **validated_data
         )
 
         for tag in tags:
-            tag_instance=RecipeTag(tag_id=tag, recipe_id=instance)
+            tag_instance = RecipeTag(tag_id=tag, recipe_id=instance)
             tag_instance.save()
 
         # If user add several identical ingridients, their amount sums.
@@ -184,7 +187,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             RecipeTag.objects.get_or_create(tag_id=tag, recipe_id=instance)
 
         RecipeIngredient.objects.filter(recipe_id=instance).delete()
-        
+
         # If user add several identical ingridients, their amount sums.
         dataset = {}
         for ingredient in ingredients:
@@ -236,7 +239,7 @@ class UserSubscribedSerializer(UserSerializer):
 class SubscriptionSerializer(serializers.ModelSerializer):
     email = serializers.ReadOnlyField(source='following.email')
     id = serializers.ReadOnlyField(source='following.id')
-    first_name =serializers.ReadOnlyField(source='following.first_name')
+    first_name = serializers.ReadOnlyField(source='following.first_name')
     last_name = serializers.ReadOnlyField(source='following.last_name')
     username = serializers.ReadOnlyField(source='following.username')
     recipes = serializers.SerializerMethodField(read_only=True)

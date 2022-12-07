@@ -16,6 +16,7 @@ class Ingredient(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=250)
     measurement_unit = models.CharField(max_length=250)
+
     class Meta:
         ordering = ('name',)
 
@@ -35,8 +36,8 @@ class Recipe(models.Model):
         related_name='recipes'
     )
     image = models.ImageField(
-        upload_to=get_upload_path, 
-        null=True,  
+        upload_to=get_upload_path,
+        null=True,
         default=None
         )
     name = models.CharField(max_length=CHARFIELD_MAX_LENGTH)
@@ -89,6 +90,7 @@ class RecipeTag(models.Model):
         blank=True,
         null=True
     )
+
     class Meta:
         ordering = ('tag_id',)
         constraints = [
