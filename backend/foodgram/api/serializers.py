@@ -1,6 +1,5 @@
 from django.core.validators import MinValueValidator
 from rest_framework import serializers
-
 from users.models import Subscription
 from users.serializers import UserSerializer
 

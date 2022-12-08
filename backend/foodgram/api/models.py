@@ -2,10 +2,10 @@ import os
 
 from django.core.validators import MinValueValidator
 from django.db import models
+from users.models import User
 
 from foodgram.settings import (CHARFIELD_MAX_LENGTH, MEDIA_ROOT,
                                NAMES_MAX_LENGTH)
-from users.models import User
 
 
 def get_upload_path(instance, filename):
