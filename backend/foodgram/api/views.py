@@ -16,7 +16,6 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from users.models import Subscription, User
-
 from .filters import RecipeFilter
 from .mixins import ListRetrieveViewSet, ListViewSet
 from .models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
@@ -28,6 +27,7 @@ from .serializers import (IngredientSerializer, NestedRecipeSerializer,
 
 
 class TagViewSet(ListRetrieveViewSet):
+    '''ViewSet for Tag model. Only GET requests. Return list or instance.'''
     queryset = Tag.objects.all()
     permission_classes = (AllowAny, )
     lookup_field = 'id'
@@ -35,6 +35,7 @@ class TagViewSet(ListRetrieveViewSet):
 
 
 class SubscriptionListViewSet(ListViewSet):
+    '''ViewSet for Subscription model. Only GET requests. Return list.'''
     queryset = Subscription.objects.all()
     permission_classes = (IsAuthenticated,)
     serializer_class = SubscriptionSerializer
@@ -44,6 +45,7 @@ class SubscriptionListViewSet(ListViewSet):
 @api_view(['DELETE', 'POST'])
 @login_required
 def user_subscribe(request, user_id):
+    '''ViewSet to supscripe (POST) and unsubscribed (DELETE) to author.'''
     if request.method == 'DELETE':
         get_object_or_404(
             Subscription,
@@ -67,6 +69,10 @@ def user_subscribe(request, user_id):
 
 
 def favorite_shoppingcart_func(request, model, recipe_id):
+    '''Common function for favorite and shopping cart view functions.
+    
+    Recieve request, model - Favorite or ShoppingCart - and recipe id.
+    '''
     if request.method == 'DELETE':
         get_object_or_404(
             model,
@@ -90,45 +96,13 @@ def favorite_shoppingcart_func(request, model, recipe_id):
 def recipe_favorite(request, recipe_id):
     '''View function to add recipe to favorites.'''
     return favorite_shoppingcart_func(request, Favorite, recipe_id)
-    # if request.method == 'DELETE':
-    #     get_object_or_404(
-    #         Favorite,
-    #         user=request.user,
-    #         recipe__id=recipe_id
-    #     ).delete()
-    #     return Response(status=status.HTTP_204_NO_CONTENT)
-
-    # recipe = get_object_or_404(Recipe, id=recipe_id)
-    # if not Favorite.objects.filter(
-    #         user=request.user,
-    #         recipe__id=recipe_id
-    # ).exists():
-    #     Favorite.objects.create(user=request.user, recipe=recipe)
-    # serializer = NestedRecipeSerializer(instance=recipe)
-    # return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['DELETE', 'POST'])
 @login_required
 def shopping_cart(request, recipe_id):
-    '''Функция для добавления и удаления рецептов в корзину рецептов.'''
+    '''Function to add recipes to of remove from  shopping cart.'''
     return favorite_shoppingcart_func(request, ShoppingCart, recipe_id)
-    # if request.method == 'DELETE':
-    #     get_object_or_404(
-    #         ShoppingCart,
-    #         user=request.user,
-    #         recipe__id=recipe_id
-    #     ).delete()
-    #     return Response(status=status.HTTP_204_NO_CONTENT)
-
-    # recipe = get_object_or_404(Recipe, id=recipe_id)
-    # if not ShoppingCart.objects.filter(
-    #         user=request.user,
-    #         recipe__id=recipe_id
-    # ).exists():
-    #     ShoppingCart.objects.create(user=request.user, recipe=recipe)
-    # serializer = NestedRecipeSerializer(instance=recipe)
-    # return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['GET'])
@@ -138,7 +112,13 @@ def download_shopping_cart(request):
 
     Через related_name обращаемся к модели ShoppingCart, в ней - находим
     ingredient_id и amount. С помощью annotate создаем новое значение count,
-    в котором суммируем значения всех amount для одинаковых ингридиентов.'''
+    в котором суммируем значения всех amount для одинаковых ингридиентов.
+    '''
+
+    if not request.user.shoppingcarts.exists():
+        return Response(
+            'Your shopping list is empty!', status=status.HTTP_204_NO_CONTENT
+        )
 
     shopping_cart = request.user.shoppingcarts.all().values(
         'recipe__recipeingredient__ingredient_id__id',
@@ -147,10 +127,7 @@ def download_shopping_cart(request):
     ).order_by(
         'recipe__recipeingredient__ingredient_id__name'
     ).annotate(count=Sum('recipe__recipeingredient__amount'))
-    if len(shopping_cart) < 1:
-        return Response(
-            'Your shopping list is empty!', status=status.HTTP_204_NO_CONTENT
-        )
+
     sentence = ''
     for ingredient in shopping_cart:
         sentence += '{name} ({measurement_unit}) - {amount}\n'.format(
@@ -177,6 +154,7 @@ def download_shopping_cart(request):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
+    '''ViewSet for Recipe model objects.'''
     queryset = Recipe.objects.all()
     permission_classes = (IsAuthorOrReadOnly, )
     serializer_class = RecipeSerializer
@@ -189,6 +167,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
 
 class IngredientViewSet(ListRetrieveViewSet):
+    '''ViewSet for Ingredient model objects.'''
     queryset = Ingredient.objects.all()
     permission_classes = (AllowAny, )
     lookup_field = 'id'

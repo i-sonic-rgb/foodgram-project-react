@@ -1,15 +1,17 @@
 import django_filters
-from django_filters import rest_framework as filters
 
 from .models import Recipe
 
 
 class RecipeFilter(django_filters.FilterSet):
-    is_favorited = filters.BooleanFilter(method='get_is_favorited')
-    is_in_shopping_cart = filters.BooleanFilter(
+    '''Custom filter for Recipes.'''
+    is_favorited = django_filters.rest_framework.BooleanFilter(
+        method='get_is_favorited'
+    )
+    is_in_shopping_cart = django_filters.rest_framework.BooleanFilter(
         method='get_is_in_shopping_cart'
     )
-    tags = filters.CharFilter(method='get_tags')
+    tags = django_filters.rest_framework.CharFilter(method='get_tags')
 
     class Meta:
         model = Recipe
@@ -21,16 +23,19 @@ class RecipeFilter(django_filters.FilterSet):
         ]
 
     def get_tags(self, queryset, name, value):
+        '''Filter recipe's tags by Tag instance names.'''
         if value:
             return queryset.filter(tags__slug=value)
         return queryset
 
     def get_is_favorited(self, queryset, name, value):
+        '''Return recipes which added to favorite by user. Filter by bool.'''
         if value:
             return queryset.filter(favorites__user=self.request.user)
         return queryset
 
     def get_is_in_shopping_cart(self, queryset, name, value):
+        '''Return recipes added to shopping cart by user. Filter by bool.'''
         if value:
             return queryset.filter(in_shopping_cart__user=self.request.user)
 

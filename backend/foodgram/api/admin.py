@@ -5,16 +5,19 @@ from .models import (Favorite, Ingredient, Recipe, RecipeIngredient, RecipeTag,
 
 
 class RecipeTagInline(admin.TabularInline):
+    '''Class for RecipeAdmin inline for RecipeTag M2M relations.'''
     model = RecipeTag
     extra = 1
 
 
 class RecipeIngredientInline(admin.TabularInline):
+    '''Class for RecipeAdmin inline for RecipeIngredient M2M relations.'''
     model = RecipeIngredient
     extra = 1
 
 
 class RecipeAdmin(admin.ModelAdmin):
+    '''Recipe AdminModel for standart DjangoAdmin panel.'''
     list_display = (
         'id',
         'author',
@@ -29,13 +32,15 @@ class RecipeAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
     def get_tags(self, obj):
-        return [tag.name for tag in obj.tags.all()]
+        '''Return tags of the Recipe names.'''
+        return list(obj.tags.values_list('name', flat=True))
 
     def favorited(self, obj):
-        return len(obj.favorites.all())
+        return obj.favorites.count()
 
 
 class IngredientAdmin(admin.ModelAdmin):
+    '''Ingredient AdminModel for standart DjangoAdmin panel.'''
     list_display = (
         'id',
         'name',
@@ -46,8 +51,7 @@ class IngredientAdmin(admin.ModelAdmin):
 
 
 class TagAdmin(admin.ModelAdmin):
-    '''Admin for tags. slug field created automatically (can be changed).'''
-
+    '''Admin for tags. Slug field created automatically (can be changed).'''
     list_display = ('id', 'name', 'color', 'slug')
     inlines = (RecipeTagInline,)
     search_fields = ('name', )
@@ -55,6 +59,7 @@ class TagAdmin(admin.ModelAdmin):
 
 
 class FaworiteShoppingCartBase(admin.ModelAdmin):
+    '''Common base AdminModel for Favorite and ShoppingCart classes.'''
     list_display = (
         'user',
         'recipe',
@@ -65,14 +70,17 @@ class FaworiteShoppingCartBase(admin.ModelAdmin):
 
 
 class FaworiteAdmin(FaworiteShoppingCartBase):
+    '''Favorite AdminModel for standart DjangoAdmin panel.'''
     pass
 
 
 class ShoppingCartAdmin(FaworiteShoppingCartBase):
+    '''ShoppingCart AdminModel for standart DjangoAdmin panel.'''
     pass
 
 
 class RecipeIngredientAdmin(admin.ModelAdmin):
+    '''AdminModel for standart Django panel for RecipeTag M2M model.'''
     list_display = ('id', 'ingredient_id', 'recipe_id', 'amount')
 
 
