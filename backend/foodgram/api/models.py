@@ -3,9 +3,8 @@ import os
 from django.core.validators import MinValueValidator
 from django.db import models
 
-from foodgram.settings import (
-    CHARFIELD_MAX_LENGTH, MEDIA_ROOT, NAMES_MAX_LENGTH
-)
+from foodgram.settings import (CHARFIELD_MAX_LENGTH, MEDIA_ROOT,
+                               NAMES_MAX_LENGTH)
 from users.models import User
 
 
@@ -34,7 +33,7 @@ class Ingredient(models.Model):
         verbose_name = 'Ингридиент'
         verbose_name_plural = 'Ингридиенты'
         ordering = ('name',)
-        
+
     def __str__(self) -> str:
         return self.name
 
@@ -62,12 +61,12 @@ class Tag(models.Model):
         blank=False,
         null=False,
     )
-    
+
     class Meta:
         verbose_name = 'Тэг'
         verbose_name_plural = 'Тэги'
         ordering = ('name',)
-        
+
     def __str__(self) -> str:
         return self.name
 
@@ -118,7 +117,7 @@ class Recipe(models.Model):
         ordering = ('-pub_date',)
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
-    
+
     def __str__(self) -> str:
         return self.name
 
@@ -144,7 +143,7 @@ class RecipeIngredient(models.Model):
         validators=[MinValueValidator(1), ],
         verbose_name='Количество'
     )
-    
+
     class Meta:
         ordering = ('recipe_id',)
         verbose_name = 'Ингридиенты в рецепте'

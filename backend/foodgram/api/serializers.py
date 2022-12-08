@@ -3,6 +3,7 @@ from rest_framework import serializers
 
 from users.models import Subscription
 from users.serializers import UserSerializer
+
 from .fields import Base64ImageField, Hex2NameColor
 from .models import Ingredient, Recipe, RecipeIngredient, RecipeTag, Tag, User
 
@@ -130,10 +131,9 @@ class RecipeSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     "Several identical ingredients!"
                 )
-            else:
-                dataset[
-                    ingredient['ingredient_id']['id']
-                ] = ingredient['amount']
+            dataset[
+                ingredient['ingredient_id']['id']
+            ] = ingredient['amount']
         instance = Recipe.objects.create(
             author=self.context['request'].user, **validated_data
         )
@@ -153,10 +153,9 @@ class RecipeSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     "Several identical ingredients!"
                 )
-            else:
-                dataset[
-                    ingredient['ingredient_id']['id']
-                ] = ingredient['amount']
+            dataset[
+                ingredient['ingredient_id']['id']
+            ] = ingredient['amount']
         RecipeIngredient.objects.filter(recipe_id=instance).delete()
         self.ingredientsrecipe(dataset, instance)
 
@@ -169,7 +168,6 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         super().update(instance, validated_data)
         return instance
-
 
 
 class NestedRecipeSerializer(RecipeSerializer):

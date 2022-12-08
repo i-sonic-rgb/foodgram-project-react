@@ -16,6 +16,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from users.models import Subscription, User
+
 from .filters import RecipeFilter
 from .mixins import ListRetrieveViewSet, ListViewSet
 from .models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
@@ -70,7 +71,7 @@ def user_subscribe(request, user_id):
 
 def favorite_shoppingcart_func(request, model, recipe_id):
     '''Common function for favorite and shopping cart view functions.
-    
+
     Recieve request, model - Favorite or ShoppingCart - and recipe id.
     '''
     if request.method == 'DELETE':

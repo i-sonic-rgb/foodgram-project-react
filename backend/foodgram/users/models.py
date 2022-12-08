@@ -5,6 +5,7 @@ from django.db import models
 
 from foodgram.settings import (CHARFIELD_MAX_LENGTH, EMAIL_MAX_LENGTH,
                                USERNAME_MAX_LENGTH)
+
 from .validators import validate_username
 
 

@@ -5,8 +5,8 @@ from users.models import User
 
 
 class Command(createsuperuser.Command):
-    '''Custom command to create superuser. To do so write in terminal: 
-    
+    '''Custom command to create superuser. To do so write in terminal:
+
     python manage.py createcustomsuperuser --username <value> --email <value>
     --first_name <value> last_name <value> --password <value>.
     '''
@@ -31,14 +31,13 @@ class Command(createsuperuser.Command):
             help='Specifies the password for the superuser.',
         )
 
-
     def handle(self, *args, **options):
         password = options.get('password')
         username = options.get('username')
         first_name = options.get('first_name')
         last_name = options.get('last_name')
         email = options.get('email')
-        
+
         if (
             not password
             or not username
@@ -68,5 +67,5 @@ class Command(createsuperuser.Command):
             user.is_superuser = True
             user.save()
             self.stdout.write("Superuser created successfully.")
-        except:
+        except Exception:
             self.stdout.write("Failed to create superuser.")
