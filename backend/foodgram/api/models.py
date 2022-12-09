@@ -2,6 +2,7 @@ import os
 
 from django.core.validators import MinValueValidator
 from django.db import models
+
 from foodgram.settings import (CHARFIELD_MAX_LENGTH, MEDIA_ROOT,
                                NAMES_MAX_LENGTH)
 from users.models import User
@@ -18,7 +19,7 @@ class Ingredient(models.Model):
     '''Model for Ingridient objects.'''
     name = models.CharField(
         max_length=NAMES_MAX_LENGTH,
-        verbose_name='Наименование ингридиента',
+        verbose_name='Наименование ингредиента',
         unique=True,
         blank=False,
         null=False,
@@ -29,8 +30,8 @@ class Ingredient(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Ингридиент'
-        verbose_name_plural = 'Ингридиенты'
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
         ordering = ('name',)
 
     def __str__(self) -> str:
@@ -94,12 +95,11 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient,
         through='RecipeIngredient',
-        verbose_name='Ингридиенты',
-        null=False,
+        verbose_name='Ингредиенты',
         blank=False
     )
     tags = models.ManyToManyField(
-        Tag, through='RecipeTag', verbose_name='Тэги', null=False, blank=False
+        Tag, through='RecipeTag', verbose_name='Тэги', blank=False
     )
     cooking_time = models.PositiveIntegerField(
         verbose_name='Время приготовления',
@@ -123,20 +123,20 @@ class Recipe(models.Model):
 
 class RecipeIngredient(models.Model):
     '''Custom M2M model for Recipe and Ingridient tables connection.'''
-    recipe_id = models.ForeignKey(
+    recipe = models.ForeignKey(
         Recipe,
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
         verbose_name='Рецепт'
     )
-    ingredient_id = models.ForeignKey(
+    ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.SET_NULL,
         related_name='recipes',
         blank=True,
         null=True,
-        verbose_name='Ингридиент'
+        verbose_name='Ингредиент'
     )
     amount = models.PositiveIntegerField(
         validators=[MinValueValidator(1), ],
@@ -144,27 +144,27 @@ class RecipeIngredient(models.Model):
     )
 
     class Meta:
-        ordering = ('recipe_id',)
-        verbose_name = 'Ингридиенты в рецепте'
-        verbose_name_plural = 'Ингридиенты в рецепте'
+        ordering = ('recipe',)
+        verbose_name = 'Ингредиенты в рецепте'
+        verbose_name_plural = 'Ингредиенты в рецепте'
         constraints = [
             models.UniqueConstraint(
                 name="recipe_ingredient_unique_relationships",
-                fields=["recipe_id", "ingredient_id"],
+                fields=["recipe", "ingredient"],
             ),
         ]
 
 
 class RecipeTag(models.Model):
     '''Custom M2M model for Recipe and Tag tables connection.'''
-    recipe_id = models.ForeignKey(
+    recipe = models.ForeignKey(
         Recipe,
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
         verbose_name='Рецепт'
     )
-    tag_id = models.ForeignKey(
+    tag = models.ForeignKey(
         Tag,
         on_delete=models.SET_NULL,
         related_name='recipes',
@@ -174,11 +174,11 @@ class RecipeTag(models.Model):
     )
 
     class Meta:
-        ordering = ('tag_id',)
+        ordering = ('tag',)
         constraints = [
             models.UniqueConstraint(
                 name="recipe_tag_unique_relationships",
-                fields=["recipe_id", "tag_id"],
+                fields=["recipe", "tag"],
             ),
         ]
 

@@ -1,29 +1,24 @@
-import io
-
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from reportlab.lib.units import cm
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfgen import canvas
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from users.models import Subscription, User
 
 from .filters import RecipeFilter
 from .mixins import ListRetrieveViewSet, ListViewSet
 from .models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
 from .paginations import RecipePagination
 from .permissions import IsAuthorOrReadOnly
-from .serializers import (IngredientSerializer, NestedRecipeSerializer,
-                          RecipeSerializer, SubscriptionSerializer,
-                          TagSerializer, UserSubscribedSerializer)
+from .serializers import (IngredientSerializer, RecipeSerializer,
+                          SubscriptionSerializer, TagSerializer,
+                          UserSubscribedSerializer)
+from .utils import favorite_shoppingcart_func, pdf_from_shopping_cart
+from users.models import Subscription, User
 
 
 class TagViewSet(ListRetrieveViewSet):
@@ -68,29 +63,6 @@ def user_subscribe(request, user_id):
     return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
 
 
-def favorite_shoppingcart_func(request, model, recipe_id):
-    '''Common function for favorite and shopping cart view functions.
-
-    Recieve request, model - Favorite or ShoppingCart - and recipe id.
-    '''
-    if request.method == 'DELETE':
-        get_object_or_404(
-            model,
-            user=request.user,
-            recipe__id=recipe_id
-        ).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    recipe = get_object_or_404(Recipe, id=recipe_id)
-    if not model.objects.filter(
-            user=request.user,
-            recipe__id=recipe_id
-    ).exists():
-        model.objects.create(user=request.user, recipe=recipe)
-    serializer = NestedRecipeSerializer(instance=recipe)
-    return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
-
-
 @api_view(['DELETE', 'POST'])
 @login_required
 def recipe_favorite(request, recipe_id):
@@ -111,7 +83,7 @@ def download_shopping_cart(request):
     '''Получаем данные из рецептов в корзине.
 
     Через related_name обращаемся к модели ShoppingCart, в ней - находим
-    ingredient_id и amount. С помощью annotate создаем новое значение count,
+    ingredient и amount. С помощью annotate создаем новое значение count,
     в котором суммируем значения всех amount для одинаковых ингридиентов.
     '''
 
@@ -121,36 +93,18 @@ def download_shopping_cart(request):
         )
 
     shopping_cart = request.user.shoppingcarts.all().values(
-        'recipe__recipeingredient__ingredient_id__id',
-        'recipe__recipeingredient__ingredient_id__name',
-        'recipe__recipeingredient__ingredient_id__measurement_unit'
+        'recipe__recipeingredient__ingredient__id',
+        'recipe__recipeingredient__ingredient__name',
+        'recipe__recipeingredient__ingredient__measurement_unit'
     ).order_by(
-        'recipe__recipeingredient__ingredient_id__name'
+        'recipe__recipeingredient__ingredient__name'
     ).annotate(count=Sum('recipe__recipeingredient__amount'))
 
-    sentence = ''
-    for ingredient in shopping_cart:
-        sentence += '{name} ({measurement_unit}) - {amount}\n'.format(
-            name=ingredient['recipe__recipeingredient__ingredient_id__name'],
-            measurement_unit=ingredient[
-                'recipe__recipeingredient__ingredient_id__measurement_unit'
-            ],
-            amount=ingredient['count']
-        )
-    sentence += 'Thanks! Your shopping list is created by IP.'
-
-    buffer = io.BytesIO()
-    c = canvas.Canvas(buffer)
-    pdfmetrics.registerFont(TTFont('FreeSans', './FreeSans.ttf'))
-    c.setFont('FreeSans', 12)
-    textobject = c.beginText(2 * cm, 29.7 * cm - 2 * cm)
-    for line in sentence.splitlines(False):
-        textobject.textLine(line.encode('utf-8'))
-    c.drawText(textobject)
-    c.save()
-    buffer.seek(0)
-
-    return FileResponse(buffer, as_attachment=True, filename='List.pdf')
+    return FileResponse(
+        pdf_from_shopping_cart(shopping_cart),
+        as_attachment=True,
+        filename='List.pdf'
+    )
 
 
 class RecipeViewSet(viewsets.ModelViewSet):

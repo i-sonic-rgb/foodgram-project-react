@@ -1,10 +1,10 @@
 from django.core.validators import MinValueValidator
 from rest_framework import serializers
-from users.models import Subscription
-from users.serializers import UserSerializer
 
 from .fields import Base64ImageField, Hex2NameColor
 from .models import Ingredient, Recipe, RecipeIngredient, RecipeTag, Tag, User
+from users.models import Subscription
+from users.serializers import UserSerializer
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -21,26 +21,14 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'color', 'slug')
 
 
-class TagField(serializers.PrimaryKeyRelatedField):
-    def to_representation(self, obj):
-        return TagSerializer(obj).data
-
-    def to_internal_value(self, data):
-        try:
-            tag = Tag.objects.get(id=data)
-        except Exception:
-            raise serializers.ValidationError('No such tag!')
-        return tag
-
-
 class RecipeIngidientSerializer(serializers.Serializer):
     id = serializers.PrimaryKeyRelatedField(
         queryset=Ingredient.objects.all(), required=True,
-        source='ingredient_id.id'
+        source='ingredient.id'
     )
-    name = serializers.ReadOnlyField(source='ingredient_id.name')
+    name = serializers.ReadOnlyField(source='ingredient.name')
     measurement_unit = serializers.ReadOnlyField(
-        source='ingredient_id.measurement_unit'
+        source='ingredient.measurement_unit'
     )
     amount = serializers.IntegerField(
         required=True, validators=[MinValueValidator(1), ]
@@ -61,7 +49,9 @@ class RecipeSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngidientSerializer(
         required=True, many=True, source='recipeingredient_set'
     )
-    tags = TagField(queryset=Tag.objects.all(), many=True)
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(), many=True
+    )
 
     class Meta:
         model = Recipe
@@ -108,17 +98,28 @@ class RecipeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'at least one ingredient required!'
             )
+        dataset = {}
+        for ingredient in value:
+            if ingredient['ingredient']['id'] in dataset.keys():
+                raise serializers.ValidationError(
+                    "Several identical ingredients!"
+                )
+            dataset[
+                ingredient['ingredient']['id']
+            ] = ingredient['amount']
         return value
 
-    def ingredientsrecipe(self, dataset, instance):
+    def recipe_tags_ingredients(self, dataset, instance, tags):
         '''Function to create RecipeIngredient models while create/update.'''
-        for id, amount in dataset.items():
-            ri = RecipeIngredient(
-                ingredient_id=id,
-                recipe_id=instance,
-                amount=amount
-            )
-            ri.save()
+        RecipeIngredient.objects.bulk_create([
+            RecipeIngredient(
+                ingredient=id, recipe=instance, amount=amount
+            ) for id, amount in dataset.items()
+        ])
+        
+        RecipeTag.objects.bulk_create([
+            RecipeTag(tag=tag, recipe=instance) for tag in tags
+        ])
 
     def create(self, validated_data):
         # only unique tags available.
@@ -126,20 +127,13 @@ class RecipeSerializer(serializers.ModelSerializer):
         ingredients = validated_data.pop('recipeingredient_set')
         dataset = {}
         for ingredient in ingredients:
-            if ingredient['ingredient_id']['id'] in dataset.keys():
-                raise serializers.ValidationError(
-                    "Several identical ingredients!"
-                )
             dataset[
-                ingredient['ingredient_id']['id']
+                ingredient['ingredient']['id']
             ] = ingredient['amount']
         instance = Recipe.objects.create(
             author=self.context['request'].user, **validated_data
         )
-        RecipeTag.objects.bulk_create([
-            RecipeTag(tag_id=tag, recipe_id=instance) for tag in tags
-        ])
-        self.ingredientsrecipe(dataset, instance)
+        self.recipe_tags_ingredients(dataset, instance, tags)
         instance.save()
         return instance
 
@@ -148,25 +142,26 @@ class RecipeSerializer(serializers.ModelSerializer):
         ingredients = validated_data.pop('recipeingredient_set')
         dataset = {}
         for ingredient in ingredients:
-            if ingredient['ingredient_id']['id'] in dataset.keys():
-                raise serializers.ValidationError(
-                    "Several identical ingredients!"
-                )
             dataset[
-                ingredient['ingredient_id']['id']
+                ingredient['ingredient']['id']
             ] = ingredient['amount']
-        RecipeIngredient.objects.filter(recipe_id=instance).delete()
-        self.ingredientsrecipe(dataset, instance)
-
-        RecipeTag.objects.filter(recipe_id=instance).exclude(
-            tag_id__in=tags
+        RecipeIngredient.objects.filter(recipe=instance).delete()
+        RecipeTag.objects.filter(recipe=instance).exclude(
+            tag__in=tags
         ).delete()
-        RecipeTag.objects.bulk_create([
-            RecipeTag(tag_id=tag, recipe_id=instance) for tag in tags
-        ])
+        self.recipe_tags_ingredients(dataset, instance, tags)
 
         super().update(instance, validated_data)
         return instance
+    
+    def to_representation(self, instance):
+        representation = super(
+            RecipeSerializer, self
+        ).to_representation(instance)
+        representation['tags'] = [
+            {**TagSerializer(tag).data} for tag in instance.tags.all()
+        ]
+        return representation
 
 
 class NestedRecipeSerializer(RecipeSerializer):

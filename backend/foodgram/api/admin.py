@@ -81,7 +81,7 @@ class ShoppingCartAdmin(FaworiteShoppingCartBase):
 
 class RecipeIngredientAdmin(admin.ModelAdmin):
     '''AdminModel for standart Django panel for RecipeTag M2M model.'''
-    list_display = ('id', 'ingredient_id', 'recipe_id', 'amount')
+    list_display = ('id', 'ingredient', 'recipe', 'amount')
 
 
 admin.site.register(Favorite, FaworiteAdmin)

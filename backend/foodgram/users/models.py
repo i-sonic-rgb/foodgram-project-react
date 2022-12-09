@@ -2,10 +2,10 @@ from enum import Enum
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from foodgram.settings import (CHARFIELD_MAX_LENGTH, EMAIL_MAX_LENGTH,
-                               USERNAME_MAX_LENGTH)
 
 from .validators import validate_username
+from foodgram.settings import (CHARFIELD_MAX_LENGTH, EMAIL_MAX_LENGTH,
+                               USERNAME_MAX_LENGTH)
 
 
 class Roles(Enum):
