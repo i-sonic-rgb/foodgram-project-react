@@ -116,7 +116,7 @@ class RecipeSerializer(serializers.ModelSerializer):
                 ingredient=id, recipe=instance, amount=amount
             ) for id, amount in dataset.items()
         ])
-        
+
         RecipeTag.objects.bulk_create([
             RecipeTag(tag=tag, recipe=instance) for tag in tags
         ])
@@ -153,7 +153,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         super().update(instance, validated_data)
         return instance
-    
+
     def to_representation(self, instance):
         representation = super(
             RecipeSerializer, self
