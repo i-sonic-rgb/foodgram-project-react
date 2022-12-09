@@ -3,8 +3,7 @@ import os
 from django.core.validators import MinValueValidator
 from django.db import models
 
-from foodgram.settings import (CHARFIELD_MAX_LENGTH, MEDIA_ROOT,
-                               NAMES_MAX_LENGTH)
+from foodgram.settings import CHARFIELD_MAX_LENGTH, NAMES_MAX_LENGTH
 from users.models import User
 
 
