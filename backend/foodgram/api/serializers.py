@@ -15,7 +15,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class TagSerializer(serializers.ModelSerializer):
-    '''Serializer for Tag nodel objects. 
+    '''Serializer for Tag nodel objects.
 
     Color saved as HEX code and returns as name through custom field.
     '''
@@ -164,7 +164,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         '''Need this for tags field only.
-        
+
         When creating/updating, provide list of int (as Tag pk). When
         retrieving object(s) - returns TagSerializer.
         '''
@@ -186,7 +186,7 @@ class NestedRecipeSerializer(RecipeSerializer):
 
 class UserSubscribedSerializer(UserSerializer):
     '''Special serializer for SubscriptionSerializer.
-    
+
     Provides author's data together with his/her recipes and total number of
     his/her recipes.
     '''
@@ -213,8 +213,8 @@ class UserSubscribedSerializer(UserSerializer):
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     '''Serializer for Subscription page.
-    
-    Return author UserSerializer with his/her Recipes and total No of 
+
+    Return author UserSerializer with his/her Recipes and total No of
     author's recipes.
     '''
     email = serializers.ReadOnlyField(source='following.email')
