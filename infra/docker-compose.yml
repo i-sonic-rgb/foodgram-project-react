@@ -20,7 +20,8 @@ services:
       - media_value:/app/media/
     depends_on:
       - db
-    command: bash -c "python manage.py migrate"
+    command: >
+      bash -c "python manage.py migrate"
     env_file:
       - ./.env
   
