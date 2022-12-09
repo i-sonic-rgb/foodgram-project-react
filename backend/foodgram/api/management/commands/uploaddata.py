@@ -28,7 +28,7 @@ class Command(BaseCommand):
         superuser.save()
 
         with open(
-            os.path.join(BASE_DIR, 'static/data/ingredients.json'),
+            os.path.join(BASE_DIR, '/data/ingredients.json'),
             'r', encoding='utf-8', newline=''
         ) as jsonfile:
             ingredients = json.load(jsonfile)
@@ -43,7 +43,7 @@ class Command(BaseCommand):
             ])
 
         with open(
-            os.path.join(BASE_DIR, 'static/data/tags.json'),
+            os.path.join(BASE_DIR, 'data/tags.json'),
             'r', encoding='utf-8', newline=''
         ) as jsonfile:
             tags = json.load(jsonfile)
@@ -52,7 +52,7 @@ class Command(BaseCommand):
             ])
 
         with open(
-            os.path.join(BASE_DIR, 'static/data/users.json'),
+            os.path.join(BASE_DIR, 'data/users.json'),
             'r', encoding='utf-8', newline=''
         ) as jsonfile:
             users = json.load(jsonfile)
