@@ -11,7 +11,7 @@ from users.models import User
 def get_upload_path(instance, filename):
     '''Returns an upload path to image based on Recipe instance name.'''
     return os.path.join(
-        MEDIA_ROOT, "recipes/images/", f"{instance.name}-{filename}"
+       "recipes/images/", f"{instance.name}-{filename}"
     )
 
 
