@@ -1,5 +1,5 @@
 ReadMe
-# Проект YaMDB Final
+# Проект Foodgram
 ![event parameter](https://github.com/i-sonic-rgb/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg?event=push)
 
 https://github.com/i-sonic-rgb/foodgram-project-react

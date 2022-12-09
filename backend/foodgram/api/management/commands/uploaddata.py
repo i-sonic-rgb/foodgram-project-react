@@ -10,7 +10,7 @@ from users.models import User
 
 class Command(BaseCommand):
     # Show this when the user types help
-    help = "Loads data from /static/data/"
+    help = "Loads data from /data/ folder."
 
     def handle(self, *args, **options):
         # Show this before loading the data into the database
@@ -28,7 +28,7 @@ class Command(BaseCommand):
         superuser.save()
 
         with open(
-            os.path.join(BASE_DIR, '/data/ingredients.json'),
+            os.path.join(BASE_DIR, 'data/ingredients.json'),
             'r', encoding='utf-8', newline=''
         ) as jsonfile:
             ingredients = json.load(jsonfile)
