@@ -1,0 +1,4 @@
+[{"username":"ivan","email":"ivan@ivan.ru","role":"admin","first_name":"Ivan","last_name":"Ivanov","password":"1q2w3e4r5t6y7u8i9o0p"},
+{"username":"petr","email":"petr@petr.ru","role":"user","first_name":"Petr","last_name":"Petrov","password":"1q2w3e4r5t6y7u8i9o0p"},
+{"username":"sidor","email":"sidor@sidr.ru","role":"user","first_name":"Sidor","last_name":"Sidorov","password":"1q2w3e4r5t6y7u8i9o0p"},
+{"username":"andrey","email":"andrey@andrey.ru","role":"blocked","first_name":"Andrey","last_name":"Andreev","password":"1q2w3e4r5t6y7u8i9o0p"}]

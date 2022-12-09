@@ -36,6 +36,7 @@ def favorite_shoppingcart_func(request, model, recipe_id):
 
 
 def pdf_from_shopping_cart(shopping_cart):
+    '''Prints ingridients from Recipes added to shopping cart to pdf.'''
     sentence = ''
     for ingredient in shopping_cart:
         sentence += '{name} ({measurement_unit}) - {amount}\n'.format(
