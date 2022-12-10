@@ -11,7 +11,7 @@ class RecipeFilter(django_filters.FilterSet):
     is_in_shopping_cart = django_filters.rest_framework.BooleanFilter(
         method='get_is_in_shopping_cart'
     )
-    tags = django_filters.rest_framework.CharFilter(method='get_tags')
+    tags = django_filters.rest_framework.CharFilter(field_name="tags_name")
 
     class Meta:
         model = Recipe
