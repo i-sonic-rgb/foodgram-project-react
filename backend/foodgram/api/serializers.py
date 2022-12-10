@@ -154,9 +154,7 @@ class RecipeSerializer(serializers.ModelSerializer):
                 ingredient['ingredient']['id']
             ] = ingredient['amount']
         RecipeIngredient.objects.filter(recipe=instance).delete()
-        RecipeTag.objects.filter(recipe=instance).exclude(
-            tag__in=tags
-        ).delete()
+        RecipeTag.objects.filter(recipe=instance).delete()
         self.recipe_tags_ingredients(dataset, instance, tags)
 
         super().update(instance, validated_data)
