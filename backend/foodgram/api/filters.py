@@ -43,6 +43,7 @@ class RecipeFilter(django_filters.FilterSet):
 
 
 class IngredientSearchFilter(django_filters.FilterSet):
+    '''Custom search filter for Ingredients objects. Searh by name.'''
     name = django_filters.rest_framework.CharFilter(method='get_name')
 
     class Meta:
@@ -53,5 +54,9 @@ class IngredientSearchFilter(django_filters.FilterSet):
 
     def get_name(self, queryset, name, value):
         if value:
-            return queryset.filter(name__startswith=value.lower())
+            return queryset.filter(
+                name__startswith=value.lower()
+                ).filter(
+                    name__icontains=value
+            )
         return queryset
