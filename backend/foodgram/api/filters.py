@@ -1,6 +1,6 @@
 import django_filters
 
-from .models import Recipe
+from .models import Ingredient, Recipe
 
 
 class RecipeFilter(django_filters.FilterSet):
@@ -39,4 +39,18 @@ class RecipeFilter(django_filters.FilterSet):
         if value:
             return queryset.filter(in_shopping_cart__user=self.request.user)
 
+        return queryset
+
+
+class IngredientSearchFilter(django_filters.FilterSet):
+    name = django_filters.rest_framework.CharFilter(method='get_name')
+    class Meta:
+        model = Recipe
+        fields = [
+            'name'
+        ]
+
+    def get_name(self, queryset, name, value):
+        if value:
+            return queryset.filter(name__istartswith=value)
         return queryset

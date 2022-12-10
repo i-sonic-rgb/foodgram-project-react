@@ -9,7 +9,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from .filters import RecipeFilter
+from .filters import IngredientSearchFilter, RecipeFilter
 from .mixins import ListRetrieveViewSet, ListViewSet
 from .models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
 from .paginations import RecipePagination
@@ -126,6 +126,6 @@ class IngredientViewSet(ListRetrieveViewSet):
     permission_classes = (AllowAny, )
     lookup_field = 'id'
     serializer_class = IngredientSerializer
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter, )
+    filter_backends = (DjangoFilterBackend, )
+    filterset_class = IngredientSearchFilter
     pagination_class = LimitOffsetPagination
-    search_fields = ('^name',)
