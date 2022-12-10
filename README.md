@@ -12,7 +12,7 @@ https://github.com/i-sonic-rgb/foodgram-project-react
 в избранное и список покупок, а также скачивать список покупок, который состоит
 из перечня ингридиентов необходимых для приготовления блюда (pdf).
 
-Проект доступен по адресу: IP: 158.160.12.170 
+Проект доступен по адресу: http://sonicyap.myftp.org или по IP: 158.160.12.170 
 
 ### Технологии
 - Python 
@@ -39,18 +39,20 @@ https://github.com/i-sonic-rgb/foodgram-project-react
 - в терминале откройте папку /infra/
 - запустите контейнеры: sudo docker-compose up
 - если после запуска потребуется обновить код - внесите правки и в терминале наберите sudo docker-compose up -d --build
-- для загрузки предустановленных данных, включая суперпользователя, наберите sudo docker-compose exec web python manage.py uploaddata
 - чтобы удалить контейнеры и зависимости: sudo docker-compose down -v
 
 ## Инструкция по запуску на сервере
 - На сервере должны быть установлены Docker, docker-compose
-
+- После развертывания контейнеров рекомендуется выполнить команду sudo docker-compose exec web python manage.py migrate
+- для загрузки предустановленных данных, включая список ингредиентов, тэгов, пользователей и суперпользователя, наберите sudo docker-compose exec web python manage.py uploaddata
+- Если в .env указано DEBUG=True, рабочая БД - SQLite, в иных случаях = Postgres
 
 ## Доступные эндпоинты
-- 158.160.12.170/redoc/ - файл redoc
 - 158.160.12.170/admin/ - панель администирования
 - 158.160.12.170/api/ - api сайта
 
 ## Автор
 ### Бэкенд, инфраструктура, workflow и развертывание на сервере:
 - Igor Poliakov
+### Фронтэнд, перечень рецептов
+- Предоставлен Яндекс Практикум (https://practicum.yandex.ru) 
