@@ -1,5 +1,6 @@
 import django_filters
-from django.db.models import Q
+from django.db.models import Q, Value
+from django.db.models.functions import StrIndex
 
 from .models import Ingredient, Recipe
 
@@ -56,10 +57,16 @@ class IngredientSearchFilter(django_filters.FilterSet):
         ]
 
     def get_name(self, queryset, name, value):
-        '''Return - if the name starts with value OR contains value.'''
+        '''Return ingredients which name starts with value OR contains value.
+
+        Case insensitive. Ingredients, which names STARTS WITHthe value,
+        comes first.
+        '''
         if value:
             return queryset.filter(
                 Q(name__startswith=value.lower())
                 | Q(name__icontains=value.lower())
-            ).distinct()
+            ).distinct().annotate(
+                match=StrIndex('name', Value(value))
+            ).order_by('match')
         return queryset
