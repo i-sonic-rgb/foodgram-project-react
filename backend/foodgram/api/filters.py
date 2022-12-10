@@ -1,3 +1,5 @@
+from itertools import chain
+
 import django_filters
 
 from .models import Ingredient, Recipe
@@ -54,7 +56,8 @@ class IngredientSearchFilter(django_filters.FilterSet):
 
     def get_name(self, queryset, name, value):
         if value:
-            return queryset.filter(
-                name__startswith=value.lower()
-            ).union(queryset.filter(name__contains=value.lower()))
+            return chain(
+                queryset.filter(name__startswith=value.lower()),
+                queryset.filter(name__contains=value.lower())
+            )
         return queryset
