@@ -1,4 +1,5 @@
 import django_filters
+from django.db.models import Q
 
 from .models import Ingredient, Recipe
 
@@ -25,7 +26,9 @@ class RecipeFilter(django_filters.FilterSet):
     def get_tags(self, queryset, name, value):
         '''Filter recipe's tags by Tag instance names.'''
         if value:
-            return queryset.filter(tags__slug=value)
+            return queryset.filter(
+                tags__slug__in=dict(self.request.query_params)['tags']
+            )
         return queryset
 
     def get_is_favorited(self, queryset, name, value):
@@ -53,6 +56,10 @@ class IngredientSearchFilter(django_filters.FilterSet):
         ]
 
     def get_name(self, queryset, name, value):
+        '''Return - if the name starts with value OR contains value.'''
         if value:
-            return queryset.filter(name__startswith=value.lower())
+            return queryset.filter(
+                Q(name__startswith=value.lower())
+                | Q(name__icontains=value.lower())
+            )
         return queryset

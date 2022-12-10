@@ -113,10 +113,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrReadOnly, )
     serializer_class = RecipeSerializer
     lookup_field = 'id'
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter, )
+    filter_backends = (DjangoFilterBackend, )
     pagination_class = RecipePagination
     filterset_class = RecipeFilter
-    search_fields = ('tags__name',)
     http_method_names = ['get', 'post', 'patch', 'delete']
 
 
