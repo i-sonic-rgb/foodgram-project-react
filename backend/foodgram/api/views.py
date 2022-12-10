@@ -116,7 +116,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend, filters.SearchFilter, )
     pagination_class = RecipePagination
     filterset_class = RecipeFilter
-    search_fields = ('$text',)
+    search_fields = ('tags__name',)
     http_method_names = ['get', 'post', 'patch', 'delete']
 
 
