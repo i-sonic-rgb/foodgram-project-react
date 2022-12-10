@@ -56,7 +56,5 @@ class IngredientSearchFilter(django_filters.FilterSet):
         if value:
             return queryset.filter(
                 name__startswith=value.lower()
-                ).filter(
-                    name__icontains=value
-                )
+            ).filter(name__icontains=value)
         return queryset
