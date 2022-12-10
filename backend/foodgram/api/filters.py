@@ -44,8 +44,9 @@ class RecipeFilter(django_filters.FilterSet):
 
 class IngredientSearchFilter(django_filters.FilterSet):
     name = django_filters.rest_framework.CharFilter(method='get_name')
+
     class Meta:
-        model = Recipe
+        model = Ingredient
         fields = [
             'name'
         ]
