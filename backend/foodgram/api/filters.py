@@ -25,7 +25,7 @@ class RecipeFilter(django_filters.FilterSet):
     def get_tags(self, queryset, name, value):
         '''Filter recipe's tags by Tag instance names.'''
         if value:
-            return queryset.filter(tags__slug__contains=value)
+            return queryset.filter(tags__slug__in=value)
         return queryset
 
     def get_is_favorited(self, queryset, name, value):
