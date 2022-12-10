@@ -128,4 +128,4 @@ class IngredientViewSet(ListRetrieveViewSet):
     serializer_class = IngredientSerializer
     filter_backends = (DjangoFilterBackend, filters.SearchFilter, )
     pagination_class = LimitOffsetPagination
-    search_fields = ('$name',)
+    search_fields = ('^name',)
