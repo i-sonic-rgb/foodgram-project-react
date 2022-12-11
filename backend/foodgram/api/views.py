@@ -23,7 +23,7 @@ from users.models import Subscription, User
 
 class TagViewSet(ListRetrieveViewSet):
     '''ViewSet for Tag model. Only GET requests. Return list or instance.'''
-    # queryset = Tag.objects.all()
+    queryset = Tag.objects.all()
     permission_classes = (AllowAny, )
     lookup_field = 'id'
     serializer_class = TagSerializer
@@ -31,7 +31,7 @@ class TagViewSet(ListRetrieveViewSet):
 
 class SubscriptionListViewSet(ListViewSet):
     '''ViewSet for Subscription model. Only GET requests. Return list.'''
-    queryset = Subscription.objects.all()
+    # queryset = Subscription.objects.all()
     permission_classes = (IsAuthenticated,)
     serializer_class = SubscriptionSerializer
     pagination_class = RecipePagination
