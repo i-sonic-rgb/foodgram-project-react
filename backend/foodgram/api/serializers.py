@@ -240,7 +240,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             obj.following.recipes.all()[:3],
             many=True,
             # source='following.recipes'
-        )
+        ).data
 
     def get_recipes_count(self, obj):
         return obj.following.recipes.count()
