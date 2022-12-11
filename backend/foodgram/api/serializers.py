@@ -236,10 +236,13 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         )
 
     def get_recipes(self, obj):
+        limit = 4
+        if self.context['request'].request.query_params.get('recipes_limit'):
+            limit = self.context['request'].request.query_params.get(
+                'recipes_limit'
+            )
         return NestedRecipeSerializer(
-            obj.following.recipes.all()[:3],
-            many=True,
-            # source='following.recipes'
+            obj.following.recipes.all()[:limit],many=True
         ).data
 
     def get_recipes_count(self, obj):

@@ -19,7 +19,6 @@ class Ingredient(models.Model):
     name = models.CharField(
         max_length=NAMES_MAX_LENGTH,
         verbose_name='Наименование ингредиента',
-        unique=True,
         blank=False,
         null=False,
     )
@@ -32,6 +31,12 @@ class Ingredient(models.Model):
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
         ordering = ('name',)
+        constraints = [
+            models.UniqueConstraint(
+                name="ingredient_measurement_unit_unique_relationships",
+                fields=["name", "measurement_unit"],
+            ),
+        ]
 
     def __str__(self) -> str:
         return self.name
