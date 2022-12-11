@@ -181,6 +181,10 @@ class NestedRecipeSerializer(RecipeSerializer):
         model = Recipe
         fields = ('id', 'image', 'name', 'cooking_time',)
 
+    def to_representation(self, instance):
+        data = instance.all()[:3]
+        return super().to_representation(data)
+
 
 class UserSubscribedSerializer(UserSerializer):
     '''Special serializer for SubscriptionSerializer.
