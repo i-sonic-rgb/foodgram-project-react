@@ -237,9 +237,10 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
     def get_recipes(self, obj):
         '''Return recipes serializers, total number is limited.'''
-        limit = 6
-        if self.context['request'].query_params.get('recipes_limit'):
+        try:
             limit = self.context['request'].query_params.get('recipes_limit')
+        except Exception:
+            limit = 6
         return NestedRecipeSerializer(
             obj.following.recipes.all()[:limit], many=True
         ).data
