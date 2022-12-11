@@ -181,9 +181,6 @@ class NestedRecipeSerializer(RecipeSerializer):
         model = Recipe
         fields = ('id', 'image', 'name', 'cooking_time',)
 
-    def to_representation(self, instance):
-        return super().to_representation(instance)
-
 
 class UserSubscribedSerializer(UserSerializer):
     '''Special serializer for SubscriptionSerializer.
@@ -223,9 +220,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     first_name = serializers.ReadOnlyField(source='following.first_name')
     last_name = serializers.ReadOnlyField(source='following.last_name')
     username = serializers.ReadOnlyField(source='following.username')
-    recipes = NestedRecipeSerializer(
-        many=True, read_only=True, source='following.recipes'
-    )
+    recipes = serializers.SerializerMethodField(read_only=True)
     recipes_count = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -238,6 +233,13 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             'last_name',
             'recipes',
             'recipes_count'
+        )
+
+    def get_recipes(self, obj):
+        return NestedRecipeSerializer(
+            obj.following.recipes.all()[:3],
+            many=True,
+            # source='following.recipes'
         )
 
     def get_recipes_count(self, obj):
