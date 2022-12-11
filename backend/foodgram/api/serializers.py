@@ -183,7 +183,7 @@ class NestedRecipeSerializer(RecipeSerializer):
 
 
 class UserSubscribedSerializer(UserSerializer):
-    '''Special serializer for SubscriptionSerializer.
+    '''Special serializer for author - returns after subscription thereon.
 
     Provides author's data together with his/her recipes and total number of
     his/her recipes.
@@ -236,11 +236,10 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         )
 
     def get_recipes(self, obj):
+        '''Return recipes serializers, total number is limited.'''
         limit = 6
-        if self.context['request'].request.query_params.get('recipes_limit'):
-            limit = self.context['request'].request.query_params.get(
-                'recipes_limit'
-            )
+        if self.context['request'].query_params.get('recipes_limit'):
+            limit = self.context['request'].query_params.get('recipes_limit')
         return NestedRecipeSerializer(
             obj.following.recipes.all()[:limit], many=True
         ).data
