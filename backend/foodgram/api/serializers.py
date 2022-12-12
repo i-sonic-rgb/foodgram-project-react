@@ -49,7 +49,9 @@ class RecipeSerializer(serializers.ModelSerializer):
     '''Serializer for RecipeViewSet.'''
     author = UserSerializer(many=False, read_only=True)
     image = Base64ImageField(required=False,)
-    cooking_time = serializers.IntegerField(required=True)
+    cooking_time = serializers.IntegerField(
+        required=True, validators=[MinValueValidator(1), ]
+    )
     is_favorited = serializers.SerializerMethodField(read_only=True)
     is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
     ingredients = RecipeIngidientSerializer(
@@ -237,7 +239,6 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
     def get_recipes(self, obj):
         '''Return recipes serializers, total number is limited.'''
-        limit = 3
         try:
             limit = int(self.context['request'].query_params['recipes_limit'])
         except Exception:
