@@ -64,8 +64,7 @@ class IngredientSearchFilter(django_filters.FilterSet):
         '''
         if value:
             return queryset.filter(
-                Q(name__startswith=value.lower())
-                | Q(name__icontains=value.lower())
+                name__icontains=value.lower()
             ).distinct().annotate(
                 match=StrIndex('name', Value(value))
             ).order_by('match')
