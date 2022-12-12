@@ -1,5 +1,5 @@
 import django_filters
-from django.db.models import Q, Value
+from django.db.models import Value
 from django.db.models.functions import StrIndex
 
 from .models import Ingredient, Recipe
